@@ -9,7 +9,7 @@ import {
   setYakubun,
   startGenbun,
   type GenbunSession,
-} from "./useGenbun";
+} from "./genbun";
 
 function henshuSession(overrides: Partial<GenbunSession> = {}): GenbunSession {
   return {
