@@ -7,6 +7,7 @@ import { useHantei } from "./useHantei";
 
 vi.mock("./store", () => ({
   hanteiBun: vi.fn<() => Promise<Hantei>>(),
+  logJsError: vi.fn<() => Promise<void>>(async () => undefined),
 }));
 
 type SetSession = (updater: (prev: GenbunSession | null) => GenbunSession | null) => void;
@@ -163,7 +164,7 @@ describe("useHantei", () => {
     expect(store.hanteiBun).not.toHaveBeenCalled();
   });
 
-  test("末尾の Tab は選択を動かさない", () => {
+  test("末尾の Tab は選択を動かさない", async () => {
     vi.mocked(store.hanteiBun).mockResolvedValue(ok);
     const session = baseSession("", 2);
     session.buns[2] = emptyBun("う。", "End");
@@ -172,5 +173,7 @@ describe("useHantei", () => {
       h.result.current.onTab();
     });
     expect(h.current.selectedIndex).toBe(2);
+    await waitFor(() => expect(store.hanteiBun).toHaveBeenCalled());
+    await waitFor(() => expect(h.result.current.isPending(2)).toBe(false));
   });
 });

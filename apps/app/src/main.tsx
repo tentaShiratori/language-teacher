@@ -3,7 +3,10 @@ import ReactDOM from "react-dom/client";
 import { createHashRouter, RouterProvider } from "react-router";
 import App from "./App";
 import { appRoutes } from "./_lib/appRoutes";
+import { installGlobalErrorLog } from "./_lib/error_log";
 import { HanteiLogMado } from "./_lib/HanteiLogMado";
+
+installGlobalErrorLog();
 
 const router = createHashRouter(
   appRoutes({

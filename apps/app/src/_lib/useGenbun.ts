@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+import { logCaughtError } from "./error_log";
 import {
   fromRecord,
   mergeSelected,
@@ -19,7 +20,11 @@ async function persist(session: GenbunSession): Promise<void> {
   if (record === null) {
     return;
   }
-  await saveGenbun(record);
+  try {
+    await saveGenbun(record);
+  } catch (err) {
+    logCaughtError(err);
+  }
 }
 
 export function useGenbun() {
@@ -35,7 +40,8 @@ export function useGenbun() {
           setIchiran(items);
         }
       })
-      .catch(() => {
+      .catch((err) => {
+        logCaughtError(err);
         if (alive) {
           setIchiran([]);
         }
@@ -48,7 +54,10 @@ export function useGenbun() {
   function refreshIchiran() {
     void listGenbun()
       .then(setIchiran)
-      .catch(() => setIchiran([]));
+      .catch((err) => {
+        logCaughtError(err);
+        setIchiran([]);
+      });
   }
 
   function onPaste(body: string) {
@@ -116,8 +125,8 @@ export function useGenbun() {
       if (next !== null) {
         setSession(next);
       }
-    } catch {
-      // 開けなければそのまま
+    } catch (err) {
+      logCaughtError(err);
     }
   }
 
@@ -126,8 +135,8 @@ export function useGenbun() {
       await deleteGenbun(id);
       setSession((prev) => (prev?.id === id ? null : prev));
       refreshIchiran();
-    } catch {
-      // 失敗時は一覧を据え置き
+    } catch (err) {
+      logCaughtError(err);
     }
   }
 

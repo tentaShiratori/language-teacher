@@ -1,3 +1,4 @@
+use crate::error_log::{log_rust_err, ErrorLogPaths};
 use rusqlite::{params, Connection, OptionalExtension};
 use serde::{Deserialize, Serialize};
 use std::path::Path;
@@ -327,23 +328,38 @@ fn sql_to_opt_bool(value: Option<i64>) -> Option<bool> {
 }
 
 #[tauri::command]
-pub fn save_genbun(store: State<'_, Store>, record: GenbunRecord) -> Result<(), String> {
-    store.save_genbun(record)
+pub fn save_genbun(
+    store: State<'_, Store>,
+    error_log: State<'_, ErrorLogPaths>,
+    record: GenbunRecord,
+) -> Result<(), String> {
+    log_rust_err(&error_log.rust, store.save_genbun(record))
 }
 
 #[tauri::command]
-pub fn list_genbun(store: State<'_, Store>) -> Result<Vec<GenbunSummary>, String> {
-    store.list_genbun()
+pub fn list_genbun(
+    store: State<'_, Store>,
+    error_log: State<'_, ErrorLogPaths>,
+) -> Result<Vec<GenbunSummary>, String> {
+    log_rust_err(&error_log.rust, store.list_genbun())
 }
 
 #[tauri::command]
-pub fn load_genbun(store: State<'_, Store>, id: String) -> Result<Option<GenbunRecord>, String> {
-    store.load_genbun(&id)
+pub fn load_genbun(
+    store: State<'_, Store>,
+    error_log: State<'_, ErrorLogPaths>,
+    id: String,
+) -> Result<Option<GenbunRecord>, String> {
+    log_rust_err(&error_log.rust, store.load_genbun(&id))
 }
 
 #[tauri::command]
-pub fn delete_genbun(store: State<'_, Store>, id: String) -> Result<(), String> {
-    store.delete_genbun(&id)
+pub fn delete_genbun(
+    store: State<'_, Store>,
+    error_log: State<'_, ErrorLogPaths>,
+    id: String,
+) -> Result<(), String> {
+    log_rust_err(&error_log.rust, store.delete_genbun(&id))
 }
 
 #[cfg(test)]

@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+import { logCaughtError } from "./error_log";
 import { listHanteiLog, type HanteiLogLine } from "./store";
 
 export type HanteiLogStatus = "loading" | "ok" | "error";
@@ -17,7 +18,8 @@ export function useHanteiLog(): { items: HanteiLogLine[]; status: HanteiLogStatu
         setItems(lines);
         setStatus("ok");
       })
-      .catch(() => {
+      .catch((err) => {
+        logCaughtError(err);
         if (!alive) {
           return;
         }

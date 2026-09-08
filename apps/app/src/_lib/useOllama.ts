@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+import { logCaughtError } from "./error_log";
 import { canHantei, defaultSettings, type OllamaStatus, type Settings } from "./ollama";
 import { fetchOllamaStatus, loadSettings, saveSettings } from "./store";
 
@@ -20,10 +21,13 @@ export function useOllama() {
       }
       if (settingsResult.status === "fulfilled") {
         setSettings(settingsResult.value);
+      } else {
+        logCaughtError(settingsResult.reason);
       }
       if (statusResult.status === "fulfilled") {
         setStatus(statusResult.value);
       } else {
+        logCaughtError(statusResult.reason);
         setStatus({ kind: "unreachable" });
       }
       setReady(true);
@@ -39,6 +43,7 @@ export function useOllama() {
       setSettings(next);
       setStatus(nextStatus);
     } catch (e) {
+      logCaughtError(e);
       setStatus({ kind: "unreachable" });
       throw e;
     }
@@ -49,6 +54,7 @@ export function useOllama() {
       const nextStatus = await fetchOllamaStatus();
       setStatus(nextStatus);
     } catch (e) {
+      logCaughtError(e);
       setStatus({ kind: "unreachable" });
       throw e;
     }

@@ -1,3 +1,4 @@
+use crate::error_log::{log_rust_err, ErrorLogPaths};
 use crate::store::{Settings, Store};
 use serde::{Deserialize, Serialize};
 use tauri::State;
@@ -53,27 +54,39 @@ pub fn fetch_ollama_status(base_url: &str, model: &str) -> OllamaStatus {
 }
 
 #[tauri::command]
-pub fn ollama_status(store: State<'_, Store>) -> Result<OllamaStatus, String> {
-    let settings = store.load_settings()?;
-    Ok(fetch_ollama_status(
-        &settings.ollama_base_url,
-        &settings.ollama_model,
-    ))
+pub fn ollama_status(
+    store: State<'_, Store>,
+    error_log: State<'_, ErrorLogPaths>,
+) -> Result<OllamaStatus, String> {
+    let result = store
+        .load_settings()
+        .map(|settings| fetch_ollama_status(&settings.ollama_base_url, &settings.ollama_model));
+    log_rust_err(&error_log.rust, result)
 }
 
 #[tauri::command]
-pub fn load_settings(store: State<'_, Store>) -> Result<Settings, String> {
-    store.load_settings()
+pub fn load_settings(
+    store: State<'_, Store>,
+    error_log: State<'_, ErrorLogPaths>,
+) -> Result<Settings, String> {
+    log_rust_err(&error_log.rust, store.load_settings())
 }
 
 #[tauri::command]
-pub fn save_settings(store: State<'_, Store>, settings: Settings) -> Result<OllamaStatus, String> {
-    store.save_settings(settings)?;
-    let saved = store.load_settings()?;
-    Ok(fetch_ollama_status(
-        &saved.ollama_base_url,
-        &saved.ollama_model,
-    ))
+pub fn save_settings(
+    store: State<'_, Store>,
+    error_log: State<'_, ErrorLogPaths>,
+    settings: Settings,
+) -> Result<OllamaStatus, String> {
+    let result = (|| {
+        store.save_settings(settings)?;
+        let saved = store.load_settings()?;
+        Ok(fetch_ollama_status(
+            &saved.ollama_base_url,
+            &saved.ollama_model,
+        ))
+    })();
+    log_rust_err(&error_log.rust, result)
 }
 
 #[cfg(test)]
