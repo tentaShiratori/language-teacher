@@ -2,7 +2,10 @@ import { BunList } from "./_lib/BunList";
 import { GakushuGengoSelect } from "./_lib/GakushuGengoSelect";
 import { GenbunIndex } from "./_lib/GenbunIndex";
 import { GenbunPaste } from "./_lib/GenbunPaste";
+import { OllamaSetup } from "./_lib/OllamaSetup";
+import { Settings } from "./_lib/Settings";
 import { useGenbun } from "./_lib/useGenbun";
+import { useOllama } from "./_lib/useOllama";
 import "./App.css";
 
 function App() {
@@ -22,10 +25,15 @@ function App() {
     onDelete,
     onBackToIchiran,
   } = useGenbun();
+  const { ready, status, settings, canHantei, onSaveSettings, onRecheck } = useOllama();
 
   return (
     <main className="app">
       <h1>言語教師</h1>
+      <Settings value={settings} onSave={onSaveSettings} />
+      {ready && status !== null && status.kind !== "ok" ? (
+        <OllamaSetup status={status} onRecheck={onRecheck} />
+      ) : null}
       {phase === "paste" ? (
         <>
           <GenbunIndex items={ichiran} onOpen={onOpen} onDelete={onDelete} />
@@ -45,10 +53,12 @@ function App() {
           <BunList
             buns={session.buns}
             selectedIndex={session.selectedIndex}
+            canHantei={canHantei}
             onSelect={onSelectBun}
             onChangeYakubun={onChangeYakubun}
             onTab={onTab}
             onCtrlEnter={onCtrlEnter}
+            onHantei={onCtrlEnter}
             onMerge={onMerge}
             onResplit={onResplit}
           />

@@ -5,19 +5,23 @@ import { YakubunField } from "./YakubunField";
 export function BunList({
   buns,
   selectedIndex,
+  canHantei,
   onSelect,
   onChangeYakubun,
   onTab,
   onCtrlEnter,
+  onHantei,
   onMerge,
   onResplit,
 }: {
   buns: Bun[];
   selectedIndex: number;
+  canHantei: boolean;
   onSelect: (index: number) => void;
   onChangeYakubun: (yakubun: string) => void;
   onTab: () => void;
   onCtrlEnter: () => void;
+  onHantei: () => void;
   onMerge: () => void;
   onResplit: (caret: number) => void;
 }) {
@@ -71,10 +75,14 @@ export function BunList({
             >
               再分割
             </button>
+            <button type="button" disabled={!canHantei} onClick={onHantei}>
+              判定
+            </button>
           </div>
           <YakubunField
             key={selectedIndex}
             value={selected.yakubun}
+            canHantei={canHantei}
             onChange={onChangeYakubun}
             onTab={onTab}
             onCtrlEnter={onCtrlEnter}

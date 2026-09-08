@@ -2,11 +2,13 @@ import { useEffect, useRef, type KeyboardEvent } from "react";
 
 export function YakubunField({
   value,
+  canHantei,
   onChange,
   onTab,
   onCtrlEnter,
 }: {
   value: string;
+  canHantei: boolean;
   onChange: (yakubun: string) => void;
   onTab: () => void;
   onCtrlEnter: () => void;
@@ -25,6 +27,9 @@ export function YakubunField({
     }
     if (event.key === "Enter" && event.ctrlKey) {
       event.preventDefault();
+      if (!canHantei) {
+        return;
+      }
       onCtrlEnter();
     }
   }
