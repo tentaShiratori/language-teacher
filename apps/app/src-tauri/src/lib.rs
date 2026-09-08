@@ -1,6 +1,7 @@
 mod error_log;
 mod hantei;
 mod hantei_log;
+mod kasho;
 mod ollama;
 mod store;
 

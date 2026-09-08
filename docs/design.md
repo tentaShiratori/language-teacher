@@ -54,6 +54,7 @@ apps/app/
       bun.ts
       genbun.ts
       hantei.ts
+      kasho.ts
       gakushu_gengo.ts
       *.test.ts
     app/
@@ -65,6 +66,7 @@ apps/app/
         BunList.tsx
         YakubunField.tsx
         HanteiView.tsx
+        KashoHyoji.tsx
         OllamaSetup.tsx
         GenbunIndex.tsx
         Settings.tsx
@@ -90,6 +92,7 @@ apps/app/
       hantei.rs
       hantei_log.rs
       error_log.rs
+      kasho.rs
       store.rs
 ```
 
@@ -141,13 +144,14 @@ bun
   bunpo           0 | 1 | null
   shiteki         null 可
   hinto           null 可
+  kasho           JSON 配列。未判定・適切は []
 
 settings
   ollama_base_url
   ollama_model      既定 qwen3:8b
 ```
 
-`tekisetsu` が null は未判定。
+`tekisetsu` が null は未判定。`kasho` の形は [hantei.md](./hantei.md) の箇所。
 
 ## 画面
 
@@ -199,7 +203,7 @@ Ollama が途中で落ちたら、その回は失敗。次の起動時検知ま�
 ### 判定の表示
 
 - 適切: 「適切」と、指摘があれば指摘
-- 不適切: 「不適切」とヒント。意味／文法のどちらが欠けたかは出してよい（`imi` / `bunpo`）。訳の全文は出さない
+- 不適切: 「不適切」とヒント。意味／文法のどちらが欠けたかは出してよい（`imi` / `bunpo`）。訳の全文は出さない。箇所があれば、訳文の上に欠けの赤 `^` と誤りの赤い波線を出す（[hantei.md](./hantei.md)）
 
 ### 一覧と設定
 

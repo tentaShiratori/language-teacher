@@ -17,6 +17,7 @@ function savedSession(): GenbunSession {
         bunpo: null,
         shiteki: null,
         hinto: null,
+        kasho: [],
       },
     ],
     selectedIndex: 0,
@@ -65,6 +66,7 @@ describe("toRecord / fromRecord", () => {
           bunpo: true,
           shiteki: "指摘",
           hinto: null,
+          kasho: [],
         },
       ],
     };

@@ -23,6 +23,7 @@ function toBun(body: string): Bun {
     bunpo: null,
     shiteki: null,
     hinto: null,
+    kasho: [],
   };
 }
 
@@ -57,7 +58,10 @@ export function fromRecord(record: GenbunRecord): GenbunSession | null {
     body: record.body,
     gakushuGengo: record.gakushuGengo,
     createdAt: record.createdAt,
-    buns: record.buns,
+    buns: record.buns.map((bun) => ({
+      ...bun,
+      kasho: bun.kasho ?? [],
+    })),
     selectedIndex: 0,
   };
 }
@@ -173,6 +177,7 @@ export function applyHantei(session: GenbunSession, index: number, hantei: Hante
         bunpo: hantei.bunpo,
         shiteki: hantei.shiteki,
         hinto: hantei.hinto,
+        kasho: hantei.kasho,
       },
       ...session.buns.slice(index + 1),
     ],

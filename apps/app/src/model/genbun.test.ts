@@ -21,6 +21,7 @@ function emptyBun(body: string) {
     bunpo: null as boolean | null,
     shiteki: null as string | null,
     hinto: null as string | null,
+    kasho: [],
   };
 }
 
@@ -143,8 +144,8 @@ describe("mergeSelected / resplitSelected", () => {
 });
 
 describe("applyHantei", () => {
-  const ok = { tekisetsu: true, imi: true, bunpo: true, shiteki: "指摘", hinto: null };
-  const ng = { tekisetsu: false, imi: false, bunpo: true, shiteki: null, hinto: "旧" };
+  const ok = { tekisetsu: true, imi: true, bunpo: true, shiteki: "指摘", hinto: null, kasho: [] };
+  const ng = { tekisetsu: false, imi: false, bunpo: true, shiteki: null, hinto: "旧", kasho: [] };
 
   test("指定した文の判定を上書きする", () => {
     const second = applyHantei(applyHantei(henshuSession(), 0, ng), 0, ok);

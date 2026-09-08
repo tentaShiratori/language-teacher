@@ -1,4 +1,5 @@
 use crate::error_log::{log_rust_err, ErrorLogPaths};
+use crate::kasho::{kasho_from_json, kasho_to_json, Kasho};
 use rusqlite::{params, Connection, OptionalExtension};
 use serde::{Deserialize, Serialize};
 use std::path::Path;
@@ -16,6 +17,8 @@ pub struct BunRecord {
     pub bunpo: Option<bool>,
     pub shiteki: Option<String>,
     pub hinto: Option<String>,
+    #[serde(default)]
+    pub kasho: Vec<Kasho>,
 }
 
 #[derive(Debug, Clone, Serialize, Deserialize, TS)]
@@ -96,7 +99,8 @@ impl Store {
               imi INTEGER,
               bunpo INTEGER,
               shiteki TEXT,
-              hinto TEXT
+              hinto TEXT,
+              kasho TEXT NOT NULL DEFAULT '[]'
             );
 
             CREATE TABLE IF NOT EXISTS settings (
@@ -109,6 +113,11 @@ impl Store {
             "#,
         )
         .map_err(|e| e.to_string())?;
+        // 既存 DB 向け。既にあれば無視する。
+        let _ = conn.execute(
+            "ALTER TABLE bun ADD COLUMN kasho TEXT NOT NULL DEFAULT '[]'",
+            [],
+        );
         Ok(())
     }
 
@@ -138,12 +147,13 @@ impl Store {
 
         for (position, bun) in record.buns.iter().enumerate() {
             let bun_id = format!("{}:{}", record.id, position);
+            let kasho_json = kasho_to_json(&bun.kasho)?;
             tx.execute(
                 r#"
                 INSERT INTO bun (
                   id, genbun_id, position, body, yakubun,
-                  tekisetsu, imi, bunpo, shiteki, hinto
-                ) VALUES (?1, ?2, ?3, ?4, ?5, ?6, ?7, ?8, ?9, ?10)
+                  tekisetsu, imi, bunpo, shiteki, hinto, kasho
+                ) VALUES (?1, ?2, ?3, ?4, ?5, ?6, ?7, ?8, ?9, ?10, ?11)
                 "#,
                 params![
                     bun_id,
@@ -156,6 +166,7 @@ impl Store {
                     opt_bool_to_sql(bun.bunpo),
                     bun.shiteki,
                     bun.hinto,
+                    kasho_json,
                 ],
             )
             .map_err(|e| e.to_string())?;
@@ -228,7 +239,7 @@ impl Store {
         let mut stmt = conn
             .prepare(
                 r#"
-                SELECT body, yakubun, tekisetsu, imi, bunpo, shiteki, hinto
+                SELECT body, yakubun, tekisetsu, imi, bunpo, shiteki, hinto, kasho
                 FROM bun
                 WHERE genbun_id = ?1
                 ORDER BY position ASC
@@ -238,21 +249,33 @@ impl Store {
 
         let rows = stmt
             .query_map(params![id], |row| {
-                Ok(BunRecord {
-                    body: row.get(0)?,
-                    yakubun: row.get(1)?,
-                    tekisetsu: sql_to_opt_bool(row.get(2)?),
-                    imi: sql_to_opt_bool(row.get(3)?),
-                    bunpo: sql_to_opt_bool(row.get(4)?),
-                    shiteki: row.get(5)?,
-                    hinto: row.get(6)?,
-                })
+                Ok((
+                    row.get::<_, String>(0)?,
+                    row.get::<_, String>(1)?,
+                    sql_to_opt_bool(row.get(2)?),
+                    sql_to_opt_bool(row.get(3)?),
+                    sql_to_opt_bool(row.get(4)?),
+                    row.get::<_, Option<String>>(5)?,
+                    row.get::<_, Option<String>>(6)?,
+                    row.get::<_, Option<String>>(7)?,
+                ))
             })
             .map_err(|e| e.to_string())?;
 
         let mut buns = Vec::new();
         for row in rows {
-            buns.push(row.map_err(|e| e.to_string())?);
+            let (body, yakubun, tekisetsu, imi, bunpo, shiteki, hinto, kasho_raw) =
+                row.map_err(|e| e.to_string())?;
+            buns.push(BunRecord {
+                body,
+                yakubun,
+                tekisetsu,
+                imi,
+                bunpo,
+                shiteki,
+                hinto,
+                kasho: kasho_from_json(kasho_raw)?,
+            });
         }
 
         Ok(Some(GenbunRecord {
@@ -391,6 +414,7 @@ mod tests {
                     bunpo: None,
                     shiteki: None,
                     hinto: None,
+                    kasho: vec![],
                 },
                 BunRecord {
                     body: "次の行。".to_string(),
@@ -400,6 +424,7 @@ mod tests {
                     bunpo: None,
                     shiteki: None,
                     hinto: None,
+                    kasho: vec![],
                 },
             ],
         }
@@ -457,6 +482,7 @@ mod tests {
             bunpo: Some(false),
             shiteki: Some("指摘".to_string()),
             hinto: None,
+            kasho: vec![],
         }];
         store.save_genbun(next).unwrap();
         let loaded = store.load_genbun("g5").unwrap().expect("exists");
@@ -464,6 +490,29 @@ mod tests {
         assert_eq!(loaded.buns[0].yakubun, "only");
         assert_eq!(loaded.buns[0].tekisetsu, Some(true));
         assert_eq!(loaded.buns[0].bunpo, Some(false));
+    }
+
+    #[test]
+    fn save_and_load_kasho() {
+        let store = temp_store();
+        let mut record = sample("g-kasho", "I go school");
+        record.buns[0].tekisetsu = Some(false);
+        record.buns[0].imi = Some(true);
+        record.buns[0].bunpo = Some(false);
+        record.buns[0].hinto = Some("前置詞がありません".to_string());
+        record.buns[0].kasho = vec![
+            Kasho::Ketsujo { index: 5 },
+            Kasho::Ayamari { start: 0, end: 1 },
+        ];
+        store.save_genbun(record).unwrap();
+        let loaded = store.load_genbun("g-kasho").unwrap().expect("exists");
+        assert_eq!(
+            loaded.buns[0].kasho,
+            vec![
+                Kasho::Ketsujo { index: 5 },
+                Kasho::Ayamari { start: 0, end: 1 },
+            ]
+        );
     }
 
     #[test]

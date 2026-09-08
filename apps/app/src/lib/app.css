@@ -413,3 +413,46 @@ button:disabled {
 .hantei-log-load-error {
   color: #b42318;
 }
+
+.kasho-hyoji {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-start;
+  gap: 0;
+  padding: 0.35rem 0.5rem;
+  border-radius: 4px;
+  background: #faf7f6;
+  font-family: Consolas, "Courier New", monospace;
+  font-size: 1rem;
+  line-height: 1.15;
+  overflow-x: auto;
+}
+
+.kasho-col {
+  display: inline-flex;
+  flex-direction: column;
+  align-items: center;
+  min-width: 0.55em;
+}
+
+.kasho-ch {
+  white-space: pre;
+}
+
+.kasho-col-ayamari .kasho-ch {
+  text-decoration: underline;
+  text-decoration-style: wavy;
+  text-decoration-color: #b42318;
+  text-underline-offset: 0.12em;
+}
+
+.kasho-mark {
+  color: #b42318;
+  font-weight: 700;
+  font-size: 0.85em;
+  line-height: 1;
+}
+
+.kasho-mark-empty {
+  visibility: hidden;
+}

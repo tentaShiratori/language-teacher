@@ -1,5 +1,6 @@
 use crate::error_log::{log_rust_err, ErrorLogPaths};
 use crate::hantei_log::{write_attempt, HanteiLogPath};
+use crate::kasho::{normalize_kasho, Kasho};
 use crate::store::Store;
 use serde::{Deserialize, Serialize};
 use std::path::Path;
@@ -14,6 +15,8 @@ pub struct Hantei {
     pub bunpo: bool,
     pub shiteki: Option<String>,
     pub hinto: Option<String>,
+    #[serde(default)]
+    pub kasho: Vec<Kasho>,
 }
 
 #[derive(Debug, Serialize)]
@@ -45,7 +48,7 @@ struct ChatChoiceMessage {
     content: Option<String>,
 }
 
-pub fn normalize_hantei(raw: Hantei) -> Hantei {
+pub fn normalize_hantei(raw: Hantei, yakubun: &str) -> Hantei {
     let tekisetsu = raw.imi && raw.bunpo;
     Hantei {
         tekisetsu,
@@ -53,6 +56,7 @@ pub fn normalize_hantei(raw: Hantei) -> Hantei {
         bunpo: raw.bunpo,
         shiteki: if tekisetsu { raw.shiteki } else { None },
         hinto: if tekisetsu { None } else { raw.hinto },
+        kasho: normalize_kasho(yakubun, raw.kasho, tekisetsu),
     }
 }
 
@@ -70,6 +74,7 @@ fn common_rules() -> &'static str {
     r#"あなたは言語学習の判定器である。模範解答や正しい訳の全文は出さない。
 適切 = 意味が原文と合う ∧ 文法が破綻していない。自然さとトーンは結論に入れない。
 適切なら指摘（shiteki）を出してよい。不適切ならヒント（hinto）だけ出し、訳文の全文もより良い訳も出さない。
+不適切なら可能な限り箇所（kasho）を出す。欠けは ketsujo、誤った連続文字列は ayamari。
 
 言語共通:
 - 不適切（意味）: 訳文が原文と別のことを言っている。主語・否定・時制・数量の取り違えを含む
@@ -80,11 +85,17 @@ fn common_rules() -> &'static str {
 ヒントは母語（日本語）で一文以内。「単語が違います」「動詞がありません」のように欠けや誤りを指す。正しい訳を例示しない。
 指摘も母語で一文以内。より自然な言い方を示してよいが、全文の書き直しにはしない。
 
+箇所の index / start / end は訳文の Unicode スカラー値（文字）の 0 始まり。
+ketsujo の index は 0 から訳文の文字数まで。ayamari は半開区間 [start, end)。
+正しい訳や補うべき語そのものは出さない。
+
 応答は次の JSON オブジェクトだけを返す。前後に説明文を付けない。
-{"tekisetsu":true,"imi":true,"bunpo":true,"shiteki":null,"hinto":null}
+{"tekisetsu":true,"imi":true,"bunpo":true,"shiteki":null,"hinto":null,"kasho":[]}
 tekisetsu は imi && bunpo と一致させる。
 shiteki は tekisetsu が true のときだけ文字列可。false なら null。
-hinto は tekisetsu が false のとき必須。true なら null。ヒントに訳文全体を含めてはならない。"#
+hinto は tekisetsu が false のとき必須。true なら null。ヒントに訳文全体を含めてはならない。
+kasho は tekisetsu が false のときだけ要素可。true なら []。
+例: {"shurui":"ketsujo","index":5} / {"shurui":"ayamari","start":0,"end":4}"#
 }
 
 fn gengo_hatantable(gakushu_gengo: &str) -> &'static str {
@@ -159,7 +170,7 @@ fn strip_think_tags(content: &str) -> String {
     out
 }
 
-pub fn parse_hantei_content(content: &str) -> Result<Hantei, String> {
+pub fn parse_hantei_content(content: &str, yakubun: &str) -> Result<Hantei, String> {
     let cleaned = strip_think_tags(content);
     let start = cleaned
         .find('{')
@@ -172,7 +183,7 @@ pub fn parse_hantei_content(content: &str) -> Result<Hantei, String> {
     }
     let slice = &cleaned[start..=end];
     let raw: Hantei = serde_json::from_str(slice).map_err(|e| e.to_string())?;
-    Ok(normalize_hantei(raw))
+    Ok(normalize_hantei(raw, yakubun))
 }
 
 pub fn request_hantei(
@@ -209,7 +220,7 @@ pub fn request_hantei(
     let mut last_err = String::new();
     for _ in 0..2 {
         match fetch_chat_content(&url, &body) {
-            Ok(content) => match parse_hantei_content(&content) {
+            Ok(content) => match parse_hantei_content(&content, yakubun) {
                 Ok(hantei) => {
                     log_attempt(log_path, model, &system, &user, Some(&content), Ok(&hantei));
                     return Ok(hantei);
@@ -306,13 +317,17 @@ mod tests {
 
     #[test]
     fn normalize_aligns_tekisetsu_and_fields() {
-        let fixed = normalize_hantei(Hantei {
-            tekisetsu: true,
-            imi: true,
-            bunpo: false,
-            shiteki: Some("指摘".into()),
-            hinto: Some("ヒント".into()),
-        });
+        let fixed = normalize_hantei(
+            Hantei {
+                tekisetsu: true,
+                imi: true,
+                bunpo: false,
+                shiteki: Some("指摘".into()),
+                hinto: Some("ヒント".into()),
+                kasho: vec![Kasho::Ketsujo { index: 0 }],
+            },
+            "Hi",
+        );
         assert_eq!(
             fixed,
             Hantei {
@@ -321,19 +336,66 @@ mod tests {
                 bunpo: false,
                 shiteki: None,
                 hinto: Some("ヒント".into()),
+                kasho: vec![Kasho::Ketsujo { index: 0 }],
             }
         );
     }
 
     #[test]
+    fn normalize_drops_kasho_when_tekisetsu() {
+        let fixed = normalize_hantei(
+            Hantei {
+                tekisetsu: false,
+                imi: true,
+                bunpo: true,
+                shiteki: Some("指摘".into()),
+                hinto: Some("ヒント".into()),
+                kasho: vec![Kasho::Ketsujo { index: 0 }],
+            },
+            "Hi",
+        );
+        assert!(fixed.tekisetsu);
+        assert!(fixed.kasho.is_empty());
+        assert!(fixed.hinto.is_none());
+    }
+
+    #[test]
+    fn normalize_drops_out_of_range_kasho() {
+        let fixed = normalize_hantei(
+            Hantei {
+                tekisetsu: false,
+                imi: false,
+                bunpo: true,
+                shiteki: None,
+                hinto: Some("ヒント".into()),
+                kasho: vec![
+                    Kasho::Ketsujo { index: 99 },
+                    Kasho::Ayamari { start: 0, end: 1 },
+                ],
+            },
+            "Hi",
+        );
+        assert_eq!(fixed.kasho, vec![Kasho::Ayamari { start: 0, end: 1 }]);
+    }
+
+    #[test]
     fn parse_strips_think_and_reads_json() {
         let content = r#"<think>reason</think>
-{"tekisetsu":false,"imi":false,"bunpo":true,"shiteki":"x","hinto":"動詞がありません"}
+{"tekisetsu":false,"imi":false,"bunpo":true,"shiteki":"x","hinto":"動詞がありません","kasho":[{"shurui":"ketsujo","index":2}]}
 "#;
-        let h = parse_hantei_content(content).unwrap();
+        let h = parse_hantei_content(content, "Hi").unwrap();
         assert!(!h.tekisetsu);
         assert!(h.shiteki.is_none());
         assert_eq!(h.hinto.as_deref(), Some("動詞がありません"));
+        assert_eq!(h.kasho, vec![Kasho::Ketsujo { index: 2 }]);
+    }
+
+    #[test]
+    fn parse_defaults_missing_kasho() {
+        let content =
+            r#"{"tekisetsu":false,"imi":false,"bunpo":true,"shiteki":null,"hinto":"ヒント"}"#;
+        let h = parse_hantei_content(content, "Hi").unwrap();
+        assert!(h.kasho.is_empty());
     }
 
     #[test]
@@ -350,6 +412,7 @@ mod tests {
         assert!(!en.contains("量詞"));
         assert!(!en.contains("動詞第二位"));
         assert!(en.contains("適切 ="));
+        assert!(en.contains("kasho"));
     }
 
     #[test]

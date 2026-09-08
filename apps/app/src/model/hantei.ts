@@ -1,4 +1,5 @@
 import type { Hantei } from "../bindings/Hantei";
+import { normalizeKasho } from "./kasho";
 
 export type { Hantei } from "../bindings/Hantei";
 
@@ -10,8 +11,9 @@ function shouldCallHantei(yakubun: string): boolean {
 /**
  * 応答を仕様どおりに直す。
  * `tekisetsu` は `imi && bunpo` に合わせ、不適切なら shiteki、適切なら hinto を捨てる。
+ * 箇所は不適切のときだけ、訳文の範囲内に限る。
  */
-function normalizeHantei(raw: Hantei): Hantei {
+function normalizeHantei(raw: Hantei, yakubun: string): Hantei {
   const tekisetsu = raw.imi && raw.bunpo;
   return {
     tekisetsu,
@@ -19,6 +21,7 @@ function normalizeHantei(raw: Hantei): Hantei {
     bunpo: raw.bunpo,
     shiteki: tekisetsu ? raw.shiteki : null,
     hinto: tekisetsu ? null : raw.hinto,
+    kasho: normalizeKasho(yakubun, raw.kasho, tekisetsu),
   };
 }
 
@@ -30,5 +33,5 @@ export async function runHanteiIfNeeded(
   if (!shouldCallHantei(yakubun)) {
     return null;
   }
-  return normalizeHantei(await run());
+  return normalizeHantei(await run(), yakubun);
 }

@@ -144,6 +144,7 @@ mod tests {
             bunpo: true,
             shiteki: Some("もう少し自然に".into()),
             hinto: None,
+            kasho: vec![],
         }
     }
 

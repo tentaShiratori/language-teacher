@@ -1,4 +1,5 @@
 import type { Bun } from "../../model/bun";
+import { KashoHyoji } from "./KashoHyoji";
 
 export function HanteiView({
   bun,
@@ -30,6 +31,7 @@ export function HanteiView({
       {futekisetsu ? (
         <div className="hantei-futekisetsu">
           <p className="hantei-kekka">不適切</p>
+          <KashoHyoji yakubun={bun.yakubun} kasho={bun.kasho} />
           {bun.hinto !== null && bun.hinto !== "" ? (
             <p className="hantei-hinto">{bun.hinto}</p>
           ) : null}
