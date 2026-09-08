@@ -5,7 +5,6 @@ use ts_rs::TS;
 
 #[derive(Debug, Clone, Serialize, Deserialize, PartialEq, Eq, TS)]
 #[serde(rename_all = "camelCase", tag = "kind")]
-#[ts(export)]
 pub enum OllamaStatus {
     Ok,
     Unreachable,

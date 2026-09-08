@@ -3,6 +3,9 @@ mod hantei_log;
 mod ollama;
 mod store;
 
+#[cfg(test)]
+mod export_bindings;
+
 use hantei::hantei_bun;
 use hantei_log::{hantei_log_path, list_hantei_log, HanteiLogPath};
 use ollama::{load_settings, ollama_status, save_settings};

@@ -78,9 +78,9 @@ apps/app/
 
 ### 共有型の更新（ts-rs）
 
-IPC を跨ぐ型（`GenbunRecord` / `GenbunSummary` / `BunRecord` / `Settings` / `OllamaStatus` / `Hantei`）は Rust に `#[derive(TS)]` と `#[ts(export)]` を付け、`serde(rename_all = "camelCase")` と揃える（[ADR 0003](./adr/0003-ts-rs-for-shared-types.md)）。
+IPC を跨ぐ型（`GenbunRecord` / `GenbunSummary` / `BunRecord` / `Settings` / `OllamaStatus` / `Hantei`）は Rust に `#[derive(TS)]` を付け、`serde(rename_all = "camelCase")` と揃える（[ADR 0003](./adr/0003-ts-rs-for-shared-types.md)）。`#[ts(export)]` は付けない（`cargo test` が TypeScript を書いて stop hook がループするため）。
 
-1. `apps/app/src-tauri` で `cargo test export_bindings`（または `cargo test`）を走らせる
+1. `apps/app/src-tauri` で `cargo export-bindings` を走らせる（`cargo test` では出さない）
 2. `apps/app/src/bindings/` に TypeScript が書き出される
 3. 生成物の差分をコミットする。フロントの `invoke` 包み（`store.ts`）は残す
 

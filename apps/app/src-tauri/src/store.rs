@@ -7,7 +7,6 @@ use ts_rs::TS;
 
 #[derive(Debug, Clone, Serialize, Deserialize, TS)]
 #[serde(rename_all = "camelCase")]
-#[ts(export)]
 pub struct BunRecord {
     pub body: String,
     pub yakubun: String,
@@ -20,7 +19,6 @@ pub struct BunRecord {
 
 #[derive(Debug, Clone, Serialize, Deserialize, TS)]
 #[serde(rename_all = "camelCase")]
-#[ts(export)]
 pub struct GenbunRecord {
     pub id: String,
     pub body: String,
@@ -31,7 +29,6 @@ pub struct GenbunRecord {
 
 #[derive(Debug, Clone, Serialize, Deserialize, TS)]
 #[serde(rename_all = "camelCase")]
-#[ts(export)]
 pub struct GenbunSummary {
     pub id: String,
     pub first_line: String,
@@ -44,7 +41,6 @@ pub const DEFAULT_OLLAMA_MODEL: &str = "qwen3:8b";
 
 #[derive(Debug, Clone, Serialize, Deserialize, PartialEq, Eq, TS)]
 #[serde(rename_all = "camelCase")]
-#[ts(export)]
 pub struct Settings {
     pub ollama_base_url: String,
     pub ollama_model: String,
