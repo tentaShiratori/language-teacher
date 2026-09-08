@@ -1,5 +1,5 @@
-export const DEFAULT_OLLAMA_BASE_URL = "http://127.0.0.1:11434";
-export const DEFAULT_OLLAMA_MODEL = "qwen3:8b";
+const DEFAULT_OLLAMA_BASE_URL = "http://127.0.0.1:11434";
+const DEFAULT_OLLAMA_MODEL = "qwen3:8b";
 
 export const OLLAMA_MODELS = ["qwen3:8b", "qwen3:14b"] as const;
 
