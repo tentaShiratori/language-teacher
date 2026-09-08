@@ -37,3 +37,4 @@ better-code-review-graph の `query`（`action=search`）が0件 → `/graphify 
 - タスクは issue ベースで進める。進行中の issue には `In Progress` ラベルをつける
 - ブランチは `{type}/{issue番号}-{slug}`。type は `feat`（機能）/ `fix`（修正）/ `chore`（土台・掃除）。slug は英小文字とハイフンだけ。用語は CONTEXT.md のローマ字をケバブにする（`gakushu-gengo`）。1 issue に 1 ブランチ。名前は issue 本文の「ブランチ」行に従う
 - PR は issue の Development に載せる。本文に `Closes #番号` を書く。`#番号` だけの言及では載らない。Dependabot 以外はリンクなしでチェックが落ちる
+- 作業が終わったらPRを作成し、コンフリクトは解決する
