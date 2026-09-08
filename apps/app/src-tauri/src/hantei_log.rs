@@ -139,7 +139,10 @@ mod tests {
         assert_eq!(line["model"], "qwen3:8b");
         assert_eq!(line["systemPrompt"], "system");
         assert_eq!(line["userPrompt"], "user");
-        assert!(line["messageContent"].as_str().unwrap().contains("tekisetsu"));
+        assert!(line["messageContent"]
+            .as_str()
+            .unwrap()
+            .contains("tekisetsu"));
         assert_eq!(line["hantei"]["tekisetsu"], true);
         assert_eq!(line["hantei"]["shiteki"], "もう少し自然に");
         assert!(line.get("error").is_none());
@@ -227,6 +230,9 @@ mod tests {
     #[test]
     fn log_path_is_under_app_data_dir() {
         let dir = PathBuf::from("/tmp/app-data");
-        assert_eq!(hantei_log_path(&dir), PathBuf::from("/tmp/app-data/hantei.jsonl"));
+        assert_eq!(
+            hantei_log_path(&dir),
+            PathBuf::from("/tmp/app-data/hantei.jsonl")
+        );
     }
 }
