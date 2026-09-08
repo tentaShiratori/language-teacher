@@ -9,7 +9,7 @@ vi.mock("../../lib/store", () => ({
 }));
 
 vi.mock("../../lib/error_log", () => ({
-  logCaughtError: vi.fn(),
+  logCaughtError: vi.fn<() => void>(),
 }));
 
 function baseLine(overrides: Partial<HanteiLogLine> = {}): HanteiLogLine {
