@@ -1,6 +1,6 @@
 [[permission]]
 identifier = "allow-store"
-description = "原文・設定の保存と Ollama / 判定コマンド"
+description = "原文・設定の保存と Ollama / 判定・ログコマンド"
 commands.allow = [
   "save_genbun",
   "list_genbun",
@@ -10,4 +10,5 @@ commands.allow = [
   "load_settings",
   "save_settings",
   "hantei_bun",
+  "list_hantei_log",
 ]
