@@ -1,8 +1,4 @@
-<<<<<<< HEAD:apps/app/src/app/_lib/KashoHyoji.tsx
-import { buildKashoCols, type Kasho } from "../../model/kasho";
-=======
-import { buildKashoSegments, type Kasho } from "./kasho";
->>>>>>> 54c3cff (fix: 箇所は波線のみにし、表示のずれを直す):apps/app/src/_lib/KashoHyoji.tsx
+import { buildKashoSegments, type Kasho } from "../../model/kasho";
 
 export function KashoHyoji({ yakubun, kasho }: { yakubun: string; kasho: readonly Kasho[] }) {
   if (kasho.length === 0) {
