@@ -1,19 +1,5 @@
 import { describe, expect, test } from "vitest";
-import { buildKashoCols, normalizeKasho, yakubunCharCount, type Kasho } from "./kasho";
-
-describe("yakubunCharCount", () => {
-  test("通常の ASCII", () => {
-    expect(yakubunCharCount("Hello")).toBe(5);
-  });
-
-  test("日本語はスカラー値で数える", () => {
-    expect(yakubunCharCount("こんにちは")).toBe(5);
-  });
-
-  test("空は 0", () => {
-    expect(yakubunCharCount("")).toBe(0);
-  });
-});
+import { buildKashoCols, normalizeKasho, type Kasho } from "./kasho";
 
 describe("normalizeKasho", () => {
   const yakubun = "I go school";
@@ -40,9 +26,10 @@ describe("normalizeKasho", () => {
   });
 
   test("末尾の欠けは許す", () => {
-    expect(
-      normalizeKasho(yakubun, [{ shurui: "ketsujo", index: yakubunCharCount(yakubun) }], false),
-    ).toEqual([{ shurui: "ketsujo", index: yakubunCharCount(yakubun) }]);
+    const len = [...yakubun].length;
+    expect(normalizeKasho(yakubun, [{ shurui: "ketsujo", index: len }], false)).toEqual([
+      { shurui: "ketsujo", index: len },
+    ]);
   });
 
   test("逆転・ゼロ長の誤りを捨てる", () => {
@@ -60,10 +47,24 @@ describe("normalizeKasho", () => {
   });
 
   test("境界: 全文を誤りにする", () => {
-    const len = yakubunCharCount(yakubun);
+    const len = [...yakubun].length;
     expect(normalizeKasho(yakubun, [{ shurui: "ayamari", start: 0, end: len }], false)).toEqual([
       { shurui: "ayamari", start: 0, end: len },
     ]);
+  });
+
+  test("日本語の文字数で範囲を見る", () => {
+    expect(normalizeKasho("こんにちは", [{ shurui: "ketsujo", index: 5 }], false)).toEqual([
+      { shurui: "ketsujo", index: 5 },
+    ]);
+    expect(normalizeKasho("こんにちは", [{ shurui: "ketsujo", index: 6 }], false)).toEqual([]);
+  });
+
+  test("空訳文は index 0 の欠けだけ許す", () => {
+    expect(normalizeKasho("", [{ shurui: "ketsujo", index: 0 }], false)).toEqual([
+      { shurui: "ketsujo", index: 0 },
+    ]);
+    expect(normalizeKasho("", [{ shurui: "ketsujo", index: 1 }], false)).toEqual([]);
   });
 });
 
