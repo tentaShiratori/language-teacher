@@ -8,6 +8,7 @@ vi.mock("./store", () => ({
   fetchOllamaStatus: vi.fn<() => Promise<OllamaStatus>>(),
   loadSettings: vi.fn<() => Promise<Settings>>(),
   saveSettings: vi.fn<(settings: Settings) => Promise<OllamaStatus>>(),
+  logJsError: vi.fn<() => Promise<void>>(async () => undefined),
 }));
 
 afterEach(() => {

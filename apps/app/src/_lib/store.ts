@@ -1,4 +1,5 @@
 import { invoke } from "@tauri-apps/api/core";
+import type { ErrorLogLine } from "../bindings/ErrorLogLine";
 import type { GenbunRecord } from "../bindings/GenbunRecord";
 import type { GenbunSummary } from "../bindings/GenbunSummary";
 import type { Hantei } from "../bindings/Hantei";
@@ -6,6 +7,7 @@ import type { OllamaStatus } from "../bindings/OllamaStatus";
 import type { Settings } from "../bindings/Settings";
 import type { GakushuGengo } from "./gakushu_gengo";
 
+export type { ErrorLogLine } from "../bindings/ErrorLogLine";
 export type { GenbunRecord } from "../bindings/GenbunRecord";
 export type { GenbunSummary } from "../bindings/GenbunSummary";
 
@@ -67,4 +69,8 @@ export type HanteiLogLine = {
 
 export async function listHanteiLog(): Promise<HanteiLogLine[]> {
   return invoke<HanteiLogLine[]>("list_hantei_log");
+}
+
+export async function logJsError(line: ErrorLogLine): Promise<void> {
+  await invoke("log_js_error", { line });
 }

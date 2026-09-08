@@ -1,3 +1,4 @@
+use crate::error_log::{log_rust_err, ErrorLogPaths};
 use crate::hantei::Hantei;
 use serde::{Deserialize, Serialize};
 use std::fs::OpenOptions;
@@ -115,8 +116,11 @@ pub fn list_lines(path: &Path) -> Result<Vec<HanteiLogLine>, String> {
 }
 
 #[tauri::command]
-pub fn list_hantei_log(log_path: State<'_, HanteiLogPath>) -> Result<Vec<HanteiLogLine>, String> {
-    list_lines(&log_path.0)
+pub fn list_hantei_log(
+    log_path: State<'_, HanteiLogPath>,
+    error_log: State<'_, ErrorLogPaths>,
+) -> Result<Vec<HanteiLogLine>, String> {
+    log_rust_err(&error_log.rust, list_lines(&log_path.0))
 }
 
 #[cfg(test)]

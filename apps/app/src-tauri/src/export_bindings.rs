@@ -1,3 +1,4 @@
+use crate::error_log::ErrorLogLine;
 use crate::hantei::Hantei;
 use crate::ollama::OllamaStatus;
 use crate::store::{BunRecord, GenbunRecord, GenbunSummary, Settings};
@@ -14,4 +15,5 @@ fn export_bindings() {
     Settings::export(&cfg).expect("export Settings");
     Hantei::export(&cfg).expect("export Hantei");
     OllamaStatus::export(&cfg).expect("export OllamaStatus");
+    ErrorLogLine::export(&cfg).expect("export ErrorLogLine");
 }

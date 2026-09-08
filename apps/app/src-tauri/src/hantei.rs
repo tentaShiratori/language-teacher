@@ -1,3 +1,4 @@
+use crate::error_log::{log_rust_err, ErrorLogPaths};
 use crate::hantei_log::{write_attempt, HanteiLogPath};
 use crate::store::Store;
 use serde::{Deserialize, Serialize};
@@ -269,28 +270,34 @@ fn fetch_chat_content(url: &str, body: &ChatRequest) -> Result<String, String> {
 pub async fn hantei_bun(
     store: State<'_, Store>,
     log_path: State<'_, HanteiLogPath>,
+    error_log: State<'_, ErrorLogPaths>,
     gakushu_gengo: String,
     genbun: String,
     bun: String,
     yakubun: String,
 ) -> Result<Hantei, String> {
-    let settings = store.load_settings()?;
-    let base_url = settings.ollama_base_url;
-    let model = settings.ollama_model;
-    let log_path = log_path.0.clone();
-    tauri::async_runtime::spawn_blocking(move || {
-        request_hantei(
-            &base_url,
-            &model,
-            &gakushu_gengo,
-            &genbun,
-            &bun,
-            &yakubun,
-            Some(&log_path),
-        )
-    })
-    .await
-    .map_err(|e| e.to_string())?
+    let rust_path = error_log.rust.clone();
+    let result = async {
+        let settings = store.load_settings()?;
+        let base_url = settings.ollama_base_url;
+        let model = settings.ollama_model;
+        let log_path = log_path.0.clone();
+        tauri::async_runtime::spawn_blocking(move || {
+            request_hantei(
+                &base_url,
+                &model,
+                &gakushu_gengo,
+                &genbun,
+                &bun,
+                &yakubun,
+                Some(&log_path),
+            )
+        })
+        .await
+        .map_err(|e| e.to_string())?
+    }
+    .await;
+    log_rust_err(&rust_path, result)
 }
 
 #[cfg(test)]

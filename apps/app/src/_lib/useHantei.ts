@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { logCaughtError } from "./error_log";
 import { applyHantei, selectNextBun, type GenbunSession } from "./genbun";
 import { runHanteiIfNeeded } from "./hantei";
 import { hanteiBun } from "./store";
@@ -75,6 +76,7 @@ export function useHantei({
         return next;
       });
     } catch (err) {
+      logCaughtError(err);
       const message = err instanceof Error ? err.message : String(err);
       setError(index, message === "" ? "判定に失敗しました" : message);
     } finally {

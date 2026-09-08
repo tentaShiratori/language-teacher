@@ -62,6 +62,7 @@ apps/app/
       bun.ts
       hantei.ts
       gakushu_gengo.ts
+      error_log.ts      # 未捕捉・握りつぶし → log_js_error
       store.ts          # invoke 包み。型は bindings を再 export
       *.test.ts
       *.test.tsx
@@ -73,12 +74,14 @@ apps/app/
       lib.rs
       ollama.rs
       hantei.rs
+      hantei_log.rs
+      error_log.rs
       store.rs
 ```
 
 ### 共有型の更新（ts-rs）
 
-IPC を跨ぐ型（`GenbunRecord` / `GenbunSummary` / `BunRecord` / `Settings` / `OllamaStatus` / `Hantei`）は Rust に `#[derive(TS)]` を付け、`serde(rename_all = "camelCase")` と揃える（[ADR 0003](./adr/0003-ts-rs-for-shared-types.md)）。`#[ts(export)]` は付けない（`cargo test` が TypeScript を書いて stop hook がループするため）。
+IPC を跨ぐ型（`GenbunRecord` / `GenbunSummary` / `BunRecord` / `Settings` / `OllamaStatus` / `Hantei` / `ErrorLogLine`）は Rust に `#[derive(TS)]` を付け、`serde(rename_all = "camelCase")` と揃える（[ADR 0003](./adr/0003-ts-rs-for-shared-types.md)）。`#[ts(export)]` は付けない（`cargo test` が TypeScript を書いて stop hook がループするため）。
 
 1. `apps/app/src-tauri` で `cargo export-bindings` を走らせる（`cargo test` では出さない）
 2. `apps/app/src/bindings/` に TypeScript が書き出される
@@ -96,8 +99,11 @@ Rust のコマンド（IPC）は次だけ。保存の中身はコマンドの向
 | `delete_genbun`                   | 一件を消す                                     |
 | `load_settings` / `save_settings` | Ollama の URL とモデル名                       |
 | `list_hantei_log`                 | 判定ログを新しい順に返す（保存の中身は向こう） |
+| `log_js_error`                    | JS のエラー行を `error_js.jsonl` へ追記        |
 
 SQLite はアプリデータディレクトリ。スキーマは `store.rs` が持つ。判定のやり取りログはファイル。
+
+エラーログは判定ログと別。アプリデータディレクトリに `error_rust.jsonl`（コマンドの `Err` と panic）と `error_js.jsonl`（未捕捉と握りつぶした catch）。1行の形は `ErrorLogLine`（`at` / `message` / `stack`。`stack` は null 可）。
 
 ## データ
 

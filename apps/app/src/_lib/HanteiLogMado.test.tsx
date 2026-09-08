@@ -8,6 +8,10 @@ vi.mock("./store", () => ({
   listHanteiLog: vi.fn<() => Promise<HanteiLogLine[]>>(),
 }));
 
+vi.mock("./error_log", () => ({
+  logCaughtError: vi.fn(),
+}));
+
 function baseLine(overrides: Partial<HanteiLogLine> = {}): HanteiLogLine {
   return {
     at: "2026-09-08T12:00:00.000Z",
