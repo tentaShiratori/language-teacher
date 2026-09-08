@@ -1,49 +1,46 @@
-import { useState } from "react";
-import reactLogo from "./assets/react.svg";
-import { invoke } from "@tauri-apps/api/core";
+import { BunList } from "./_lib/BunList";
+import { GakushuGengoSelect } from "./_lib/GakushuGengoSelect";
+import { GenbunPaste } from "./_lib/GenbunPaste";
+import { useGenbun } from "./_lib/useGenbun";
 import "./App.css";
 
 function App() {
-  const [greetMsg, setGreetMsg] = useState("");
-  const [name, setName] = useState("");
-
-  async function greet() {
-    // Learn more about Tauri commands at https://tauri.app/develop/calling-rust/
-    setGreetMsg(await invoke("greet", { name }));
-  }
+  const {
+    session,
+    phase,
+    onPaste,
+    onSelectGengo,
+    onSelectBun,
+    onTab,
+    onCtrlEnter,
+    onChangeYakubun,
+    onMerge,
+    onResplit,
+  } = useGenbun();
 
   return (
-    <main className="container">
-      <h1>Welcome to Tauri + React</h1>
-
-      <div className="row">
-        <a href="https://vite.dev" target="_blank">
-          <img src="/vite.svg" className="logo vite" alt="Vite logo" />
-        </a>
-        <a href="https://tauri.app" target="_blank">
-          <img src="/tauri.svg" className="logo tauri" alt="Tauri logo" />
-        </a>
-        <a href="https://react.dev" target="_blank">
-          <img src={reactLogo} className="logo react" alt="React logo" />
-        </a>
-      </div>
-      <p>Click on the Tauri, Vite, and React logos to learn more.</p>
-
-      <form
-        className="row"
-        onSubmit={(e) => {
-          e.preventDefault();
-          greet();
-        }}
-      >
-        <input
-          id="greet-input"
-          onChange={(e) => setName(e.currentTarget.value)}
-          placeholder="Enter a name..."
-        />
-        <button type="submit">Greet</button>
-      </form>
-      <p>{greetMsg}</p>
+    <main className="app">
+      <h1>言語教師</h1>
+      {phase === "paste" ? <GenbunPaste onPaste={onPaste} /> : null}
+      {phase === "gengo" && session !== null ? (
+        <GakushuGengoSelect value={session.gakushuGengo} locked={false} onSelect={onSelectGengo} />
+      ) : null}
+      {phase === "henshu" && session !== null && session.gakushuGengo !== null ? (
+        <>
+          <GakushuGengoSelect value={session.gakushuGengo} locked={true} onSelect={onSelectGengo} />
+          <p className="genbun-preview">{session.body}</p>
+          <BunList
+            buns={session.buns}
+            selectedIndex={session.selectedIndex}
+            onSelect={onSelectBun}
+            onChangeYakubun={onChangeYakubun}
+            onTab={onTab}
+            onCtrlEnter={onCtrlEnter}
+            onMerge={onMerge}
+            onResplit={onResplit}
+          />
+        </>
+      ) : null}
     </main>
   );
 }
