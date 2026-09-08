@@ -1,0 +1,97 @@
+# 完成までの TODO
+
+上から順にやる。テストは `pnpm test run {ファイル名}` だけ。全テスト実行はしない。変更した純関数・フックには、正常系・異常系・境界値を隣の `*.test.ts` / `*.test.tsx` に書く。Go API と `apps/web` は作らない。
+
+実装に入るときは `add-feature` と `write-test` に従う。用語は [CONTEXT.md](../CONTEXT.md)。仕様は [design.md](./design.md) と [hantei.md](./hantei.md)。
+
+## 0. 土台
+
+- [ ] `apps/app` に Tauri + React + Vite を足す。パッケージ名は `@language-teacher/app`
+- [ ] ルート `package.json` の `"tauri": "pnpm --filter @kakeibo/app tauri"` を `@language-teacher/app` に直す
+- [ ] `turbo.json` に `apps/app` の `dev` / `build` / `typecheck` / `test` / `test:run` が乗ることを確認する。Tauri の成果物を `outputs` に誤って `.next` だけ見ない
+- [ ] 家計簿名残のうち、この作業で触るファイルだけ直す（`package.json` の filter は必須。他は触ったとき）
+- [ ] `pnpm --filter @language-teacher/app tauri dev` で空ウィンドウが開く
+
+完了: ウィンドウが開き、`apps/web` も `api` も無い。
+
+## 1. 学習言語と文の分割
+
+- [ ] `src/_lib/gakushu_gengo.ts` — `en` / `zh_hans` / `ko` / `de` と表示名
+- [ ] `src/_lib/bun.ts` — `splitBun`（`。！？．` と改行。空断片を捨てる）
+- [ ] `mergeBun` / `resplitBun`（結合、キャレット位置で再分割。判定は捨てる）
+- [ ] `bun.test.ts` — 通常の句点、末尾に句点なし、連続改行、鉤括弧内の句点、空、結合、再分割
+
+完了: 純関数だけで、貼った文字列が文の配列になる。
+
+## 2. 貼り付けと文一覧（LLM なし）
+
+- [ ] `GenbunPaste` — 空では進めない
+- [ ] `GakushuGengoSelect` — 原文に対して一つ。選んだら変えられない
+- [ ] `BunList` — 境界に目印。クリックで選択
+- [ ] `YakubunField` — 選択中だけ表示し、マウント時にフォーカス
+- [ ] Tab で次の文、末尾では動かない。Ctrl+Enter は選択を動かさない
+- [ ] 結合・再分割の操作
+
+完了: Ollama 無しで、貼る → 言語 → 一文ずつ入力、まで手で通る。
+
+## 3. 保存
+
+- [ ] Rust `store.rs` — SQLite。`genbun` / `bun` / `settings`（[design.md](./design.md)）
+- [ ] `save_genbun` / `list_genbun` / `load_genbun` / `delete_genbun`
+- [ ] `useGenbun` — 貼り付け・訳文変更・結合再分割を保存する
+- [ ] `GenbunIndex` — 先頭行・言語・日時。開く・消す
+- [ ] 訳文が空のまま Tab しても、空が保存される
+
+完了: アプリを終了して開き直し、原文と訳文が戻る。判定欄は未判定。
+
+## 4. Ollama 検知と設定
+
+- [ ] `ollama.rs` — `GET /api/tags`。届かない／モデル無しを分ける
+- [ ] `ollama_status`、`load_settings` / `save_settings`
+- [ ] 既定 URL `http://127.0.0.1:11434`、既定モデル `qwen3:8b`、選択肢に `qwen3:14b`
+- [ ] 起動時と設定保存後に検知
+- [ ] `OllamaSetup` — [ollama.md](./ollama.md) と同じ手順を、失敗理由ごとに出す。判定ボタンと Tab 判定を無効化
+- [ ] `Settings`
+- [ ] `useOllama.ts` のテストは、Rust をモックできる境界（フロントの分岐）だけ。HTTP 本体は Rust 側のテストまたは手動
+
+完了: Ollama を止めると起動直後に手順が出て判定できない。起動して `qwen3:8b` を入れると消える。
+
+## 5. 判定
+
+- [ ] `hantei.ts` — 応答型。`tekisetsu` が `imi && bunpo` とずれたら補正する純関数
+- [ ] `hantei.test.ts` — 補正、空訳文は呼ばない、不適切なら `shiteki` を捨てる、適切なら `hinto` を捨てる
+- [ ] `hantei.rs` — OpenAI 互換で JSON を取る。失敗したら1回だけ再送。プロンプトは [hantei.md](./hantei.md)
+- [ ] 学習言語ごとの破綻表を、その言語のときだけプロンプトに足す
+- [ ] `hantei_bun` — 原文全体 + 対象の文 + 訳文
+- [ ] `useHantei` — Tab / Ctrl+Enter / ボタン。空はスキップ。非同期。待ち中もフォーカス可。失敗時は旧判定を残す
+- [ ] `HanteiView` — 適切＋指摘、不適切＋ヒント＋意味/文法。訳全文を出さない
+- [ ] 成功したらその文の判定を上書き保存
+
+完了: 4言語それぞれで、適切な訳と、動詞なしの訳を1回ずつ判定し、表示が仕様どおり。
+
+## 6. 操作の通し
+
+- [ ] Tab = 判定して次（空なら判定せず次）
+- [ ] Ctrl+Enter とボタン = 判定して残る
+- [ ] 判定中の文に「判定中」
+- [ ] やり直しで上書きされること
+- [ ] 一覧から戻った文の判定が見えること
+
+完了: ニュース短文を貼り、英語で3文以上を、Tab だけで判定しながら通せる。
+
+## 7. 仕上げ
+
+- [ ] 中国語（簡体）・韓国語・ドイツ語でも、6 と同じ通しを1原文ずつ
+- [ ] 14B に切り替えて1回判定できる
+- [ ] `pnpm dead-code` で、テスト以外の死にコードを残さない
+- [ ] `graphify update .`
+- [ ] `progress.md` を「v1 実装済み」に更新する
+
+完了: 上を手で確認し、未チェックが無い。
+
+## 後回し（v1 に入れない）
+
+- 振り返り、模範解答
+- OpenAI 互換キー
+- Web / Go API
+- 繁体、ファイル／URL 取り込み

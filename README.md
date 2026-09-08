@@ -4,7 +4,9 @@
 
 ## 技術スタック
 
-TBD
+v1 はデスクトップだけ。`apps/app`（Tauri + React + Vite）。判定は端末内の Ollama。`apps/web` と `api` は置かない。
+
+設計と完成までの TODO は [docs/README.md](./docs/README.md)。用語は [CONTEXT.md](./CONTEXT.md)。
 
 ## 開発
 
