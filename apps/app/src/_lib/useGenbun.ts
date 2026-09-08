@@ -15,20 +15,6 @@ import {
 import type { GakushuGengo } from "./gakushu_gengo";
 import { deleteGenbun, listGenbun, loadGenbun, saveGenbun, type GenbunSummary } from "./store";
 
-export type { GenbunPhase, GenbunSession } from "./genbun";
-export {
-  fromRecord,
-  mergeSelected,
-  phaseOf,
-  resplitSelected,
-  selectBun,
-  selectGengo,
-  selectNextBun,
-  setYakubun,
-  startGenbun,
-  toRecord,
-} from "./genbun";
-
 async function persist(session: GenbunSession): Promise<void> {
   const record = toRecord(session);
   if (record === null) {

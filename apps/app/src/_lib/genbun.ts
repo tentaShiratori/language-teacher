@@ -25,11 +25,11 @@ function toBun(body: string): Bun {
   };
 }
 
-export function newGenbunId(): string {
+function newGenbunId(): string {
   return crypto.randomUUID();
 }
 
-export function nowIso(): string {
+function nowIso(): string {
   return new Date().toISOString();
 }
 
