@@ -26,8 +26,7 @@ function App() {
     onDelete,
     onBackToIchiran,
   } = useGenbun();
-  const { ready, status, settings, canHantei, onSaveSettings, onRecheck } =
-    useOllama();
+  const { ready, status, settings, canHantei, onSaveSettings, onRecheck } = useOllama();
   const { onTab, onCtrlEnter, onHantei, isPending, errorOf } = useHantei({
     session,
     canHantei,
@@ -49,28 +48,14 @@ function App() {
         </>
       ) : null}
       {phase === "gengo" && session !== null ? (
-        <GakushuGengoSelect
-          value={session.gakushuGengo}
-          locked={false}
-          onSelect={onSelectGengo}
-        />
+        <GakushuGengoSelect value={session.gakushuGengo} locked={false} onSelect={onSelectGengo} />
       ) : null}
-      {phase === "henshu" &&
-      session !== null &&
-      session.gakushuGengo !== null ? (
+      {phase === "henshu" && session !== null && session.gakushuGengo !== null ? (
         <>
-          <button
-            type="button"
-            className="back-ichiran"
-            onClick={onBackToIchiran}
-          >
+          <button type="button" className="back-ichiran" onClick={onBackToIchiran}>
             一覧へ
           </button>
-          <GakushuGengoSelect
-            value={session.gakushuGengo}
-            locked={true}
-            onSelect={onSelectGengo}
-          />
+          <GakushuGengoSelect value={session.gakushuGengo} locked={true} onSelect={onSelectGengo} />
           <p className="genbun-preview">{session.body}</p>
           <BunList
             buns={session.buns}

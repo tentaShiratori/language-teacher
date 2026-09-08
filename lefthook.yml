@@ -10,15 +10,14 @@ pre-commit:
       run: pnpm exec oxfmt {staged_files}
       stage_fixed: true
 
-    - name: oxlint-web
-      root: apps/web/
-      glob: "*.{js,jsx,ts,tsx,mjs,cjs,mts,cts}"
-      run: pnpm exec oxlint {staged_files}
-
-    - name: oxlint-app
+    - name: oxlint
       root: apps/app/
       glob: "*.{js,jsx,ts,tsx,mjs,cjs,mts,cts}"
       run: pnpm exec oxlint {staged_files}
+
+    - name: dead-code
+      glob: "*.{js,jsx,ts,tsx,mjs,cjs,mts,cts}"
+      run: pnpm exec dead-code
 
     - name: gofmt
       glob: "*.go"
