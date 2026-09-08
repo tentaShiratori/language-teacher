@@ -2,9 +2,10 @@ import { afterEach, describe, expect, test, vi } from "vitest";
 import { renderHook, waitFor, act } from "@testing-library/react";
 import { useOllama } from "./useOllama";
 
-const fetchOllamaStatus = vi.fn();
-const loadSettings = vi.fn();
-const saveSettings = vi.fn();
+const fetchOllamaStatus = vi.fn<() => Promise<import("./ollama").OllamaStatus>>();
+const loadSettings = vi.fn<() => Promise<import("./ollama").Settings>>();
+const saveSettings =
+  vi.fn<(settings: import("./ollama").Settings) => Promise<import("./ollama").OllamaStatus>>();
 
 vi.mock("./store", () => ({
   fetchOllamaStatus: (...args: unknown[]) => fetchOllamaStatus(...args),

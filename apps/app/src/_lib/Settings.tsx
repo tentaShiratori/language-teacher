@@ -1,4 +1,4 @@
-import { useEffect, useState, type FormEvent } from "react";
+import { useState, type FormEvent } from "react";
 import { OLLAMA_MODELS, type Settings as SettingsValue } from "./ollama";
 
 export function Settings({
@@ -8,15 +8,33 @@ export function Settings({
   value: SettingsValue;
   onSave: (settings: SettingsValue) => void | Promise<void>;
 }) {
-  const [ollamaBaseUrl, setOllamaBaseUrl] = useState(value.ollamaBaseUrl);
-  const [ollamaModel, setOllamaModel] = useState(value.ollamaModel);
   const [open, setOpen] = useState(false);
 
-  useEffect(() => {
-    setOllamaBaseUrl(value.ollamaBaseUrl);
-    setOllamaModel(value.ollamaModel);
-  }, [value.ollamaBaseUrl, value.ollamaModel]);
+  return (
+    <section className="settings">
+      <button type="button" className="settings-toggle" onClick={() => setOpen((prev) => !prev)}>
+        {open ? "設定を閉じる" : "設定"}
+      </button>
+      {open ? (
+        <SettingsForm
+          key={`${value.ollamaBaseUrl}:${value.ollamaModel}`}
+          value={value}
+          onSave={onSave}
+        />
+      ) : null}
+    </section>
+  );
+}
 
+function SettingsForm({
+  value,
+  onSave,
+}: {
+  value: SettingsValue;
+  onSave: (settings: SettingsValue) => void | Promise<void>;
+}) {
+  const [ollamaBaseUrl, setOllamaBaseUrl] = useState(value.ollamaBaseUrl);
+  const [ollamaModel, setOllamaModel] = useState(value.ollamaModel);
   const canSubmit = ollamaBaseUrl.trim() !== "" && ollamaModel.trim() !== "";
 
   function onSubmit(event: FormEvent) {
@@ -31,39 +49,32 @@ export function Settings({
   }
 
   return (
-    <section className="settings">
-      <button type="button" className="settings-toggle" onClick={() => setOpen((prev) => !prev)}>
-        {open ? "設定を閉じる" : "設定"}
+    <form className="settings-form" onSubmit={onSubmit}>
+      <label htmlFor="ollama-base-url">Ollama の URL</label>
+      <input
+        id="ollama-base-url"
+        type="text"
+        value={ollamaBaseUrl}
+        onChange={(event) => setOllamaBaseUrl(event.currentTarget.value)}
+      />
+      <label htmlFor="ollama-model">モデル</label>
+      <select
+        id="ollama-model"
+        value={ollamaModel}
+        onChange={(event) => setOllamaModel(event.currentTarget.value)}
+      >
+        {OLLAMA_MODELS.map((model) => (
+          <option key={model} value={model}>
+            {model}
+          </option>
+        ))}
+        {!OLLAMA_MODELS.includes(ollamaModel as (typeof OLLAMA_MODELS)[number]) ? (
+          <option value={ollamaModel}>{ollamaModel}</option>
+        ) : null}
+      </select>
+      <button type="submit" disabled={!canSubmit}>
+        保存
       </button>
-      {open ? (
-        <form className="settings-form" onSubmit={onSubmit}>
-          <label htmlFor="ollama-base-url">Ollama の URL</label>
-          <input
-            id="ollama-base-url"
-            type="text"
-            value={ollamaBaseUrl}
-            onChange={(event) => setOllamaBaseUrl(event.currentTarget.value)}
-          />
-          <label htmlFor="ollama-model">モデル</label>
-          <select
-            id="ollama-model"
-            value={ollamaModel}
-            onChange={(event) => setOllamaModel(event.currentTarget.value)}
-          >
-            {OLLAMA_MODELS.map((model) => (
-              <option key={model} value={model}>
-                {model}
-              </option>
-            ))}
-            {!OLLAMA_MODELS.includes(ollamaModel as (typeof OLLAMA_MODELS)[number]) ? (
-              <option value={ollamaModel}>{ollamaModel}</option>
-            ) : null}
-          </select>
-          <button type="submit" disabled={!canSubmit}>
-            保存
-          </button>
-        </form>
-      ) : null}
-    </section>
+    </form>
   );
 }
