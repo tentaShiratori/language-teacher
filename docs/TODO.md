@@ -36,11 +36,11 @@
 
 ## 3. 保存
 
-- [ ] Rust `store.rs` — SQLite。`genbun` / `bun` / `settings`（[design.md](./design.md)）
-- [ ] `save_genbun` / `list_genbun` / `load_genbun` / `delete_genbun`
-- [ ] `useGenbun` — 貼り付け・訳文変更・結合再分割を保存する
-- [ ] `GenbunIndex` — 先頭行・言語・日時。開く・消す
-- [ ] 訳文が空のまま Tab しても、空が保存される
+- [x] Rust `store.rs` — SQLite。`genbun` / `bun` / `settings`（[design.md](./design.md)）
+- [x] `save_genbun` / `list_genbun` / `load_genbun` / `delete_genbun`
+- [x] `useGenbun` — 貼り付け・訳文変更・結合再分割を保存する
+- [x] `GenbunIndex` — 先頭行・言語・日時。開く・消す
+- [x] 訳文が空のまま Tab しても、空が保存される
 
 完了: アプリを終了して開き直し、原文と訳文が戻る。判定欄は未判定。
 

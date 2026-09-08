@@ -1,11 +1,14 @@
 import { mergeBun, resplitBun, splitBun, type Bun } from "./bun";
 import type { GakushuGengo } from "./gakushu_gengo";
+import { isGakushuGengo, type GenbunRecord } from "./store";
 
 export type GenbunPhase = "paste" | "gengo" | "henshu";
 
 export type GenbunSession = {
+  id: string | null;
   body: string;
   gakushuGengo: GakushuGengo | null;
+  createdAt: string | null;
   buns: Bun[];
   selectedIndex: number;
 };
@@ -19,6 +22,42 @@ function toBun(body: string): Bun {
     bunpo: null,
     shiteki: null,
     hinto: null,
+  };
+}
+
+function newGenbunId(): string {
+  return crypto.randomUUID();
+}
+
+function nowIso(): string {
+  return new Date().toISOString();
+}
+
+/** 保存できる状態ならレコードにする。 */
+export function toRecord(session: GenbunSession): GenbunRecord | null {
+  if (session.id === null || session.gakushuGengo === null || session.createdAt === null) {
+    return null;
+  }
+  return {
+    id: session.id,
+    body: session.body,
+    gakushuGengo: session.gakushuGengo,
+    createdAt: session.createdAt,
+    buns: session.buns,
+  };
+}
+
+export function fromRecord(record: GenbunRecord): GenbunSession | null {
+  if (!isGakushuGengo(record.gakushuGengo)) {
+    return null;
+  }
+  return {
+    id: record.id,
+    body: record.body,
+    gakushuGengo: record.gakushuGengo,
+    createdAt: record.createdAt,
+    buns: record.buns,
+    selectedIndex: 0,
   };
 }
 
@@ -38,23 +77,31 @@ export function startGenbun(body: string): GenbunSession | null {
     return null;
   }
   return {
+    id: null,
     body,
     gakushuGengo: null,
+    createdAt: null,
     buns: [],
     selectedIndex: 0,
   };
 }
 
-/** 学習言語は一度選んだら変えない。 */
-export function selectGengo(session: GenbunSession, gengo: GakushuGengo): GenbunSession {
+/** 学習言語は一度選んだら変えない。選んだ時点で id を付けて保存対象にする。 */
+export function selectGengo(
+  session: GenbunSession,
+  gengo: GakushuGengo,
+  id: string = newGenbunId(),
+  createdAt: string = nowIso(),
+): GenbunSession {
   if (session.gakushuGengo !== null) {
     return session;
   }
-  const buns = splitBun(session.body).map(toBun);
   return {
     ...session,
+    id,
+    createdAt,
     gakushuGengo: gengo,
-    buns,
+    buns: splitBun(session.body).map(toBun),
     selectedIndex: 0,
   };
 }
@@ -81,10 +128,13 @@ export function setYakubun(session: GenbunSession, yakubun: string): GenbunSessi
     return session;
   }
   const target = session.buns[index]!;
-  const nextBun: Bun = { ...target, yakubun };
   return {
     ...session,
-    buns: [...session.buns.slice(0, index), nextBun, ...session.buns.slice(index + 1)],
+    buns: [
+      ...session.buns.slice(0, index),
+      { ...target, yakubun },
+      ...session.buns.slice(index + 1),
+    ],
   };
 }
 
