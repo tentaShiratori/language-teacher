@@ -23,3 +23,14 @@ pre-commit:
       glob: "*.go"
       run: gofmt -w {staged_files}
       stage_fixed: true
+
+    - name: rustfmt
+      root: apps/app/src-tauri/
+      glob: "*.rs"
+      run: cargo fmt -- {staged_files}
+      stage_fixed: true
+
+    - name: clippy
+      root: apps/app/src-tauri/
+      glob: "*.rs"
+      run: cargo clippy --all-targets -- -D warnings

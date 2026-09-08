@@ -7,21 +7,58 @@ const loopCount = input.loop_count ?? 0;
 
 const root = repoRoot();
 const turbo = join(root, "node_modules", "turbo", "bin", "turbo");
-const result = spawnSync(
-  process.execPath,
-  [turbo, "lint", "fmt:check", "typecheck", "//#dead-code", "test:run"],
+const rustDir = join(root, "apps", "app", "src-tauri");
+
+const checks: { command: string; args: string[]; cwd: string }[] = [
   {
+    command: process.execPath,
+    args: [turbo, "lint", "fmt:check", "typecheck", "//#dead-code", "test:run"],
     cwd: root,
+  },
+  {
+    command: "cargo",
+    args: ["fmt", "--check"],
+    cwd: rustDir,
+  },
+  {
+    command: "cargo",
+    args: ["clippy", "--all-targets", "--", "-D", "warnings"],
+    cwd: rustDir,
+  },
+  {
+    command: "cargo",
+    args: ["test"],
+    cwd: rustDir,
+  },
+];
+
+const chunks: string[] = [];
+let failed = false;
+
+for (const check of checks) {
+  const result = spawnSync(check.command, check.args, {
+    cwd: check.cwd,
     encoding: "utf8",
     windowsHide: true,
-  },
-);
+  });
+  const output = `${result.stdout ?? ""}${result.stderr ?? ""}`
+    .replaceAll("\r\n", "\n")
+    .trim();
+  if (output) chunks.push(output);
+  if (result.error) {
+    chunks.push(String(result.error));
+    failed = true;
+    break;
+  }
+  if (result.status !== 0) {
+    failed = true;
+    break;
+  }
+}
 
-const output = `${result.stdout ?? ""}${result.stderr ?? ""}`
-  .replaceAll("\r\n", "\n")
-  .trim();
+const output = chunks.join("\n").trim();
 
-if (result.status !== 0 && loopCount < 3) {
+if (failed && loopCount < 3) {
   writeJson({
     followup_message: `Check failed:\n${output.slice(0, 4000)}\nエラーを修正してください。`,
   });
