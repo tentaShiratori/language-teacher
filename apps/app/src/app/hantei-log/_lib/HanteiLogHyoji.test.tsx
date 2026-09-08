@@ -31,6 +31,7 @@ describe("HanteiLogHyoji", () => {
               bunpo: true,
               shiteki: "もう少し自然に",
               hinto: null,
+              kasho: [],
             },
           }),
         ]}

@@ -73,8 +73,9 @@ pub fn gengo_hyoji(gakushu_gengo: &str) -> Option<&'static str> {
 fn common_rules() -> &'static str {
     r#"あなたは言語学習の判定器である。模範解答や正しい訳の全文は出さない。
 適切 = 意味が原文と合う ∧ 文法が破綻していない。自然さとトーンは結論に入れない。
-適切なら指摘（shiteki）を出してよい。不適切ならヒント（hinto）だけ出し、訳文の全文もより良い訳も出さない。
-不適切なら可能な限り箇所（kasho）を出す。誤った連続文字列だけ ayamari で示す。欠けの挿入点は出さない。
+適切なら指摘（shiteki）を出してよい。不適切ならヒント（hinto）と箇所（kasho）を対で出し、訳文の全文もより良い訳も出さない。
+誤りごとに hinto の短文と kasho の要素を1対1で対応させる。hinto だけ・kasho だけの片方出しは禁止。
+誤った連続文字列だけ ayamari で示す。欠けの挿入点は出さない。
 
 言語共通:
 - 不適切（意味）: 訳文が原文と別のことを言っている。主語・否定・時制・数量の取り違えを含む
@@ -82,7 +83,8 @@ fn common_rules() -> &'static str {
 - 指摘: 意味も文法も足りるが、不自然、またはトーンが原文とずれる
 - 見ない: 米語／英語の綴り差だけ。指摘にもしない
 
-ヒントは母語（日本語）で一文以内。「単語が違います」「動詞がありません」のように欠けや誤りを指す。正しい訳を例示しない。
+ヒントは母語（日本語）。各誤りを短く指す。「単語が違います」「動詞がありません」のように欠けや誤りを指す。正しい訳を例示しない。
+誤りが複数なら、hinto は箇所と同じ順・同じ個数の短文を「 / 」でつなぐ。
 指摘も母語で一文以内。より自然な言い方を示してよいが、全文の書き直しにはしない。
 
 箇所の start / end は訳文の Unicode スカラー値（文字）の 0 始まり。ayamari は半開区間 [start, end)。
@@ -93,7 +95,7 @@ fn common_rules() -> &'static str {
 tekisetsu は imi && bunpo と一致させる。
 shiteki は tekisetsu が true のときだけ文字列可。false なら null。
 hinto は tekisetsu が false のとき必須。true なら null。ヒントに訳文全体を含めてはならない。
-kasho は tekisetsu が false のときだけ要素可。true なら []。
+kasho は tekisetsu が false のとき必須（1件以上）。true なら []。hinto の短文の個数と一致させる。
 例: {"shurui":"ayamari","start":0,"end":4}"#
 }
 
@@ -419,6 +421,9 @@ mod tests {
         assert!(!en.contains("動詞第二位"));
         assert!(en.contains("適切 ="));
         assert!(en.contains("kasho"));
+        assert!(en.contains("対で"));
+        assert!(en.contains("1対1"));
+        assert!(en.contains("片方出しは禁止"));
     }
 
     #[test]
