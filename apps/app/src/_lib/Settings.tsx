@@ -1,7 +1,6 @@
-import { useEffect, useState, type FormEvent } from "react";
-import { HanteiLogHyoji } from "./HanteiLogHyoji";
+import { useState, type FormEvent } from "react";
 import { isOllamaModel, OLLAMA_MODELS, type Settings as SettingsValue } from "./ollama";
-import { listHanteiLog, type HanteiLogLine } from "./store";
+import { openHanteiLogMado } from "./openHanteiLogMado";
 
 export function Settings({
   value,
@@ -11,29 +10,6 @@ export function Settings({
   onSave: (settings: SettingsValue) => void | Promise<void>;
 }) {
   const [open, setOpen] = useState(false);
-  const [logOpen, setLogOpen] = useState(false);
-  const [logLines, setLogLines] = useState<HanteiLogLine[]>([]);
-
-  useEffect(() => {
-    if (!logOpen) {
-      return;
-    }
-    let alive = true;
-    void listHanteiLog()
-      .then((lines) => {
-        if (alive) {
-          setLogLines(lines);
-        }
-      })
-      .catch(() => {
-        if (alive) {
-          setLogLines([]);
-        }
-      });
-    return () => {
-      alive = false;
-    };
-  }, [logOpen]);
 
   return (
     <section className="settings">
@@ -50,11 +26,12 @@ export function Settings({
           <button
             type="button"
             className="settings-log-toggle"
-            onClick={() => setLogOpen((prev) => !prev)}
+            onClick={() => {
+              void openHanteiLogMado();
+            }}
           >
-            {logOpen ? "判定ログを閉じる" : "判定ログ"}
+            判定ログ
           </button>
-          {logOpen ? <HanteiLogHyoji items={logLines} /> : null}
         </>
       ) : null}
     </section>

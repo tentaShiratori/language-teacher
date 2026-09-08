@@ -403,3 +403,13 @@ button:disabled {
   margin: 0;
   color: #b42318;
 }
+
+.hantei-log-loading,
+.hantei-log-load-error {
+  margin: 0;
+  color: #555;
+}
+
+.hantei-log-load-error {
+  color: #b42318;
+}

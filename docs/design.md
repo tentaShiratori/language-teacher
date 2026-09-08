@@ -51,8 +51,13 @@ apps/app/
       OllamaSetup.tsx
       GenbunIndex.tsx
       Settings.tsx
+      HanteiLogHyoji.tsx
+      HanteiLogMado.tsx
+      appRoutes.tsx
+      openHanteiLogMado.ts
       useGenbun.ts
       useHantei.ts
+      useHanteiLog.ts
       useOllama.ts
       bun.ts
       hantei.ts
@@ -81,17 +86,18 @@ IPC を跨ぐ型（`GenbunRecord` / `GenbunSummary` / `BunRecord` / `Settings` /
 
 Rust のコマンド（IPC）は次だけ。保存の中身はコマンドの向こうに閉じる。
 
-| コマンド                          | すること                                   |
-| --------------------------------- | ------------------------------------------ |
-| `ollama_status`                   | 到達性と、設定モデルの有無                 |
-| `hantei_bun`                      | 原文全体と対象の文と訳文を渡し、判定を返す |
-| `save_genbun`                     | 原文・文・訳文・判定を書く                 |
-| `list_genbun`                     | 過去の原文の一覧                           |
-| `load_genbun`                     | 一件を読む                                 |
-| `delete_genbun`                   | 一件を消す                                 |
-| `load_settings` / `save_settings` | Ollama の URL とモデル名                   |
+| コマンド                          | すること                                       |
+| --------------------------------- | ---------------------------------------------- |
+| `ollama_status`                   | 到達性と、設定モデルの有無                     |
+| `hantei_bun`                      | 原文全体と対象の文と訳文を渡し、判定を返す     |
+| `save_genbun`                     | 原文・文・訳文・判定を書く                     |
+| `list_genbun`                     | 過去の原文の一覧                               |
+| `load_genbun`                     | 一件を読む                                     |
+| `delete_genbun`                   | 一件を消す                                     |
+| `load_settings` / `save_settings` | Ollama の URL とモデル名                       |
+| `list_hantei_log`                 | 判定ログを新しい順に返す（保存の中身は向こう） |
 
-SQLite はアプリデータディレクトリ。スキーマは `store.rs` が持つ。
+SQLite はアプリデータディレクトリ。スキーマは `store.rs` が持つ。判定のやり取りログはファイル。
 
 ## データ
 
@@ -125,7 +131,7 @@ settings
 
 ## 画面
 
-一つのウィンドウ。ログインは無い。
+本編ウィンドウと、設定から開く判定ログ用の第2ウィンドウ。同じ SPA を `react-router` の Hash 履歴で分ける（[ADR 0004](./adr/0004-react-router-hash.md)）。ログインは無い。判定ログウィンドウはログ表示だけを持ち、本編の編集状態は持たない。同じラベルのウィンドウが既にあれば前面に出す。
 
 ### 起動
 
@@ -180,7 +186,7 @@ Ollama が途中で落ちたら、その回は失敗。次の起動時検知ま�
 - 一覧は原文の先頭行と学習言語と日時
 - 開くと、文・訳文・判定が戻る
 - 消せる
-- 設定: Ollama の URL、モデル（`qwen3:8b` / `qwen3:14b`）。保存後に再検知
+- 設定: Ollama の URL、モデル（`qwen3:8b` / `qwen3:14b`）。保存後に再検知。判定ログはボタンから別ウィンドウで開く（パネル内には埋め込まない）
 
 ## 状態の流れ
 

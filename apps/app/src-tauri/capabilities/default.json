@@ -3,5 +3,12 @@
   "identifier": "default",
   "description": "Capability for the main window",
   "windows": ["main"],
-  "permissions": ["core:default", "opener:default", "allow-store"]
+  "permissions": [
+    "core:default",
+    "opener:default",
+    "allow-store",
+    "core:webview:allow-create-webview-window",
+    "core:window:allow-set-focus",
+    "core:window:allow-show"
+  ]
 }

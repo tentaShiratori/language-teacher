@@ -1,0 +1,7 @@
+{
+  "$schema": "../gen/schemas/desktop-schema.json",
+  "identifier": "hantei-log",
+  "description": "Capability for the hantei log window",
+  "windows": ["hantei-log"],
+  "permissions": ["core:default", "allow-store"]
+}
