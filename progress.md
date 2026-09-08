@@ -2,7 +2,7 @@
 
 ## 状態
 
-issue #3（学習言語と文の分割）の純関数を実装済み。`splitBun` / `mergeBun` / `resplitBun` と `gakushu_gengo`。テスト 18 件パス。
+issue #4（貼り付けと文一覧）を実装済み。`GenbunPaste` / `GakushuGengoSelect` / `BunList` / `YakubunField` / `useGenbun`。Ollama 無しで貼る → 言語 → 一文ずつ入力まで通る。`useGenbun.test.ts` 18 件パス。
 
 ## 意思決定
 
@@ -18,7 +18,8 @@ issue #3（学習言語と文の分割）の純関数を実装済み。`splitBun
 - Ollama 未導入は起動時に検知し、アプリ上に `docs/ollama.md` と同じ手順を出す
 - `splitBun` は `。！？．` の直後と改行で切る。鉤括弧内も同じ。空断片は捨てる
 - `mergeBun` / `resplitBun` は判定フィールドを null に戻す。再分割時の訳文は両方空
+- #4 時点では判定は未接続。Tab は次の文へ（末尾は留まる）。Ctrl+Enter は選択を動かさないだけ
 
 ## 次セッション
 
-- `docs/TODO.md` の 2（貼り付けと文一覧）へ。必要なら #2 の土台残りを先に
+- `docs/TODO.md` の 3（保存）へ
