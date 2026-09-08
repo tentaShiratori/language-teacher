@@ -19,12 +19,12 @@ export function useHanteiLog(): { items: HanteiLogLine[]; status: HanteiLogStatu
         setStatus("ok");
       })
       .catch((err) => {
-        logCaughtError(err);
         if (!alive) {
           return;
         }
         setItems([]);
         setStatus("error");
+        logCaughtError(err);
       });
     return () => {
       alive = false;
