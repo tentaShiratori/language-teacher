@@ -232,7 +232,7 @@ fn call_chat_once(url: &str, body: &ChatRequest) -> Result<Hantei, String> {
 }
 
 #[tauri::command]
-pub fn hantei_bun(
+pub async fn hantei_bun(
     store: State<'_, Store>,
     gakushu_gengo: String,
     genbun: String,
@@ -240,14 +240,20 @@ pub fn hantei_bun(
     yakubun: String,
 ) -> Result<Hantei, String> {
     let settings = store.load_settings()?;
-    request_hantei(
-        &settings.ollama_base_url,
-        &settings.ollama_model,
-        &gakushu_gengo,
-        &genbun,
-        &bun,
-        &yakubun,
-    )
+    let base_url = settings.ollama_base_url;
+    let model = settings.ollama_model;
+    tauri::async_runtime::spawn_blocking(move || {
+        request_hantei(
+            &base_url,
+            &model,
+            &gakushu_gengo,
+            &genbun,
+            &bun,
+            &yakubun,
+        )
+    })
+    .await
+    .map_err(|e| e.to_string())?
 }
 
 #[cfg(test)]
