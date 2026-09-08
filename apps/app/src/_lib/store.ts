@@ -1,6 +1,7 @@
 import { invoke } from "@tauri-apps/api/core";
 import type { Bun } from "./bun";
 import type { GakushuGengo } from "./gakushu_gengo";
+import type { Hantei } from "./hantei";
 import type { OllamaStatus, Settings } from "./ollama";
 
 export type GenbunRecord = {
@@ -48,4 +49,18 @@ export async function loadSettings(): Promise<Settings> {
 
 export async function saveSettings(settings: Settings): Promise<OllamaStatus> {
   return invoke<OllamaStatus>("save_settings", { settings });
+}
+
+export async function hanteiBun(input: {
+  gakushuGengo: GakushuGengo;
+  genbun: string;
+  bun: string;
+  yakubun: string;
+}): Promise<Hantei> {
+  return invoke<Hantei>("hantei_bun", {
+    gakushuGengo: input.gakushuGengo,
+    genbun: input.genbun,
+    bun: input.bun,
+    yakubun: input.yakubun,
+  });
 }

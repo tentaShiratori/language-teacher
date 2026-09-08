@@ -1,11 +1,14 @@
 import { useRef, type ReactNode } from "react";
 import type { Bun } from "./bun";
+import { HanteiView } from "./HanteiView";
 import { YakubunField } from "./YakubunField";
 
 export function BunList({
   buns,
   selectedIndex,
   canHantei,
+  pending,
+  error,
   onSelect,
   onChangeYakubun,
   onTab,
@@ -17,6 +20,8 @@ export function BunList({
   buns: Bun[];
   selectedIndex: number;
   canHantei: boolean;
+  pending: boolean;
+  error: string | null;
   onSelect: (index: number) => void;
   onChangeYakubun: (yakubun: string) => void;
   onTab: () => void;
@@ -87,6 +92,7 @@ export function BunList({
             onTab={onTab}
             onCtrlEnter={onCtrlEnter}
           />
+          <HanteiView bun={selected} pending={pending} error={error} />
         </div>
       ) : null}
     </div>

@@ -1,5 +1,6 @@
 import { mergeBun, resplitBun, splitBun, type Bun } from "./bun";
 import type { GakushuGengo } from "./gakushu_gengo";
+import type { Hantei } from "./hantei";
 import { isGakushuGengo, type GenbunRecord } from "./store";
 
 export type GenbunPhase = "paste" | "gengo" | "henshu";
@@ -152,5 +153,28 @@ export function resplitSelected(session: GenbunSession, caret: number): GenbunSe
   return {
     ...session,
     buns: resplitBun(session.buns, session.selectedIndex, caret),
+  };
+}
+
+/** 指定した文の判定を上書きする。 */
+export function applyHantei(session: GenbunSession, index: number, hantei: Hantei): GenbunSession {
+  if (index < 0 || index >= session.buns.length) {
+    return session;
+  }
+  const target = session.buns[index]!;
+  return {
+    ...session,
+    buns: [
+      ...session.buns.slice(0, index),
+      {
+        ...target,
+        tekisetsu: hantei.tekisetsu,
+        imi: hantei.imi,
+        bunpo: hantei.bunpo,
+        shiteki: hantei.shiteki,
+        hinto: hantei.hinto,
+      },
+      ...session.buns.slice(index + 1),
+    ],
   };
 }

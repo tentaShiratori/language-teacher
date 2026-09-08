@@ -282,3 +282,40 @@ button:disabled {
 .ollama-setup code {
   font-family: Consolas, "Courier New", monospace;
 }
+
+.hantei-view {
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
+  padding: 0.75rem 1rem;
+  border: 1px solid #c8c8c4;
+  border-radius: 6px;
+  background: #fff;
+}
+
+.hantei-kekka {
+  margin: 0;
+  font-weight: 600;
+}
+
+.hantei-shiteki,
+.hantei-hinto,
+.hantei-pending,
+.hantei-error {
+  margin: 0;
+}
+
+.hantei-pending {
+  color: #555;
+}
+
+.hantei-error {
+  color: #b42318;
+}
+
+.hantei-ketsujo {
+  margin: 0;
+  padding-left: 1.25rem;
+  color: #555;
+  font-size: 0.95rem;
+}

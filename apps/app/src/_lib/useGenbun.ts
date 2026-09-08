@@ -6,7 +6,6 @@ import {
   resplitSelected,
   selectBun,
   selectGengo,
-  selectNextBun,
   setYakubun,
   startGenbun,
   toRecord,
@@ -74,26 +73,6 @@ export function useGenbun() {
     setSession((prev) => (prev === null ? prev : selectBun(prev, index)));
   }
 
-  function onTab() {
-    setSession((prev) => {
-      if (prev === null) {
-        return prev;
-      }
-      void persist(prev);
-      return selectNextBun(prev);
-    });
-  }
-
-  function onCtrlEnter() {
-    setSession((prev) => {
-      if (prev === null) {
-        return prev;
-      }
-      void persist(prev);
-      return prev;
-    });
-  }
-
   function onChangeYakubun(yakubun: string) {
     setSession((prev) => {
       if (prev === null) {
@@ -159,13 +138,13 @@ export function useGenbun() {
 
   return {
     session,
+    setSession,
+    persist,
     phase,
     ichiran,
     onPaste,
     onSelectGengo,
     onSelectBun,
-    onTab,
-    onCtrlEnter,
     onChangeYakubun,
     onMerge,
     onResplit,
