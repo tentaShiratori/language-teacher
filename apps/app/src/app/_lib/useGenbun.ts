@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { logCaughtError } from "./error_log";
+import { logCaughtError } from "../../lib/error_log";
 import {
   fromRecord,
   mergeSelected,
@@ -11,9 +11,15 @@ import {
   startGenbun,
   toRecord,
   type GenbunSession,
-} from "./genbun";
-import type { GakushuGengo } from "./gakushu_gengo";
-import { deleteGenbun, listGenbun, loadGenbun, saveGenbun, type GenbunSummary } from "./store";
+} from "../../model/genbun";
+import type { GakushuGengo } from "../../model/gakushu_gengo";
+import {
+  deleteGenbun,
+  listGenbun,
+  loadGenbun,
+  saveGenbun,
+  type GenbunSummary,
+} from "../../lib/store";
 
 async function persist(session: GenbunSession): Promise<void> {
   const record = toRecord(session);

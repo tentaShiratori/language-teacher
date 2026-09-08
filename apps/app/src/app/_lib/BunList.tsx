@@ -1,5 +1,5 @@
 import { useRef, type ReactNode } from "react";
-import type { Bun } from "./bun";
+import type { Bun } from "../../model/bun";
 import { HanteiView } from "./HanteiView";
 import { YakubunField } from "./YakubunField";
 

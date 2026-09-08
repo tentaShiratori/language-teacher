@@ -1,4 +1,8 @@
-import { GAKUSHU_GENGO_HYOJI, GAKUSHU_GENGO_ICHIRAN, type GakushuGengo } from "./gakushu_gengo";
+import {
+  GAKUSHU_GENGO_HYOJI,
+  GAKUSHU_GENGO_ICHIRAN,
+  type GakushuGengo,
+} from "../../model/gakushu_gengo";
 
 export function GakushuGengoSelect({
   value,

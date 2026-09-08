@@ -1,8 +1,8 @@
 import { useState } from "react";
-import { logCaughtError } from "./error_log";
-import { applyHantei, selectNextBun, type GenbunSession } from "./genbun";
-import { runHanteiIfNeeded } from "./hantei";
-import { hanteiBun } from "./store";
+import { logCaughtError } from "../../lib/error_log";
+import { applyHantei, selectNextBun, type GenbunSession } from "../../model/genbun";
+import { runHanteiIfNeeded } from "../../model/hantei";
+import { hanteiBun } from "../../lib/store";
 
 export function useHantei({
   session,

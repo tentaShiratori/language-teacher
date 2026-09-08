@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
-import { logCaughtError } from "./error_log";
-import { canHantei, defaultSettings, type OllamaStatus, type Settings } from "./ollama";
-import { fetchOllamaStatus, loadSettings, saveSettings } from "./store";
+import { logCaughtError } from "../../lib/error_log";
+import { canHantei, defaultSettings, type OllamaStatus, type Settings } from "../../lib/ollama";
+import { fetchOllamaStatus, loadSettings, saveSettings } from "../../lib/store";
 
 export function useOllama() {
   const [status, setStatus] = useState<OllamaStatus | null>(null);

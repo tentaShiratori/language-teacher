@@ -1,10 +1,10 @@
 import { afterEach, describe, expect, test, vi } from "vitest";
 import { renderHook, waitFor, act } from "@testing-library/react";
-import type { OllamaStatus, Settings } from "./ollama";
-import * as store from "./store";
+import type { OllamaStatus, Settings } from "../../lib/ollama";
+import * as store from "../../lib/store";
 import { useOllama } from "./useOllama";
 
-vi.mock("./store", () => ({
+vi.mock("../../lib/store", () => ({
   fetchOllamaStatus: vi.fn<() => Promise<OllamaStatus>>(),
   loadSettings: vi.fn<() => Promise<Settings>>(),
   saveSettings: vi.fn<(settings: Settings) => Promise<OllamaStatus>>(),

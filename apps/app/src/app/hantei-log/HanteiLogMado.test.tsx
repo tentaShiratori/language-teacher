@@ -1,14 +1,14 @@
 import { render, screen, waitFor } from "@testing-library/react";
 import { beforeEach, describe, expect, test, vi } from "vitest";
 import { HanteiLogMado } from "./HanteiLogMado";
-import * as store from "./store";
-import type { HanteiLogLine } from "./store";
+import * as store from "../../lib/store";
+import type { HanteiLogLine } from "../../lib/store";
 
-vi.mock("./store", () => ({
+vi.mock("../../lib/store", () => ({
   listHanteiLog: vi.fn<() => Promise<HanteiLogLine[]>>(),
 }));
 
-vi.mock("./error_log", () => ({
+vi.mock("../../lib/error_log", () => ({
   logCaughtError: vi.fn(),
 }));
 

@@ -1,5 +1,5 @@
-import type { Hantei } from "./hantei";
-import type { HanteiLogLine } from "./store";
+import type { Hantei } from "../../../model/hantei";
+import type { HanteiLogLine } from "../../../lib/store";
 
 function formatAt(at: string): string {
   const date = new Date(at);

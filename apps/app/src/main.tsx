@@ -1,10 +1,11 @@
 import React from "react";
 import ReactDOM from "react-dom/client";
 import { createHashRouter, RouterProvider } from "react-router";
-import App from "./App";
-import { appRoutes } from "./_lib/appRoutes";
-import { installGlobalErrorLog } from "./_lib/error_log";
-import { HanteiLogMado } from "./_lib/HanteiLogMado";
+import App from "./app/App";
+import { HanteiLogMado } from "./app/hantei-log/HanteiLogMado";
+import { appRoutes } from "./lib/appRoutes";
+import { installGlobalErrorLog } from "./lib/error_log";
+import "./lib/app.css";
 
 installGlobalErrorLog();
 

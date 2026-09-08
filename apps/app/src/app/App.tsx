@@ -7,7 +7,6 @@ import { Settings } from "./_lib/Settings";
 import { useGenbun } from "./_lib/useGenbun";
 import { useHantei } from "./_lib/useHantei";
 import { useOllama } from "./_lib/useOllama";
-import "./App.css";
 
 function App() {
   const {

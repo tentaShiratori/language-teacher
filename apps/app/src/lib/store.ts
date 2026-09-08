@@ -5,7 +5,7 @@ import type { GenbunSummary } from "../bindings/GenbunSummary";
 import type { Hantei } from "../bindings/Hantei";
 import type { OllamaStatus } from "../bindings/OllamaStatus";
 import type { Settings } from "../bindings/Settings";
-import type { GakushuGengo } from "./gakushu_gengo";
+import type { GakushuGengo } from "../model/gakushu_gengo";
 
 export type { ErrorLogLine } from "../bindings/ErrorLogLine";
 export type { GenbunRecord } from "../bindings/GenbunRecord";

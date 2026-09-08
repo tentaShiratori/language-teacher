@@ -1,9 +1,9 @@
 import { fireEvent, render, screen } from "@testing-library/react";
 import { beforeEach, describe, expect, test, vi } from "vitest";
 import { Settings } from "./Settings";
-import * as mado from "./openHanteiLogMado";
+import * as mado from "../../lib/openHanteiLogMado";
 
-vi.mock("./openHanteiLogMado", () => ({
+vi.mock("../../lib/openHanteiLogMado", () => ({
   openHanteiLogMado: vi.fn<() => Promise<void>>(),
 }));
 

@@ -1,4 +1,4 @@
-import { setupLead, type OllamaStatus } from "./ollama";
+import { setupLead, type OllamaStatus } from "../../lib/ollama";
 
 export function OllamaSetup({
   status,

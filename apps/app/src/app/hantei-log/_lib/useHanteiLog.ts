@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
-import { logCaughtError } from "./error_log";
-import { listHanteiLog, type HanteiLogLine } from "./store";
+import { logCaughtError } from "../../../lib/error_log";
+import { listHanteiLog, type HanteiLogLine } from "../../../lib/store";
 
 export type HanteiLogStatus = "loading" | "ok" | "error";
 

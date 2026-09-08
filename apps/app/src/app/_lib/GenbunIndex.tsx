@@ -1,5 +1,5 @@
-import { GAKUSHU_GENGO_HYOJI, type GakushuGengo } from "./gakushu_gengo";
-import type { GenbunSummary } from "./store";
+import { GAKUSHU_GENGO_HYOJI, type GakushuGengo } from "../../model/gakushu_gengo";
+import type { GenbunSummary } from "../../lib/store";
 
 function formatCreatedAt(createdAt: string): string {
   const date = new Date(createdAt);

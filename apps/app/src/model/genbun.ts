@@ -1,7 +1,7 @@
 import { mergeBun, resplitBun, splitBun, type Bun } from "./bun";
 import type { GakushuGengo } from "./gakushu_gengo";
 import type { Hantei } from "./hantei";
-import { isGakushuGengo, type GenbunRecord } from "./store";
+import { isGakushuGengo, type GenbunRecord } from "../lib/store";
 
 export type GenbunPhase = "paste" | "gengo" | "henshu";
 
