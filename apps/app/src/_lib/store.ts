@@ -54,3 +54,17 @@ export async function hanteiBun(input: {
     yakubun: input.yakubun,
   });
 }
+
+export type HanteiLogLine = {
+  at: string;
+  model: string;
+  systemPrompt: string;
+  userPrompt: string;
+  messageContent: string | null;
+  hantei?: Hantei | null;
+  error?: string | null;
+};
+
+export async function listHanteiLog(): Promise<HanteiLogLine[]> {
+  return invoke<HanteiLogLine[]>("list_hantei_log");
+}
