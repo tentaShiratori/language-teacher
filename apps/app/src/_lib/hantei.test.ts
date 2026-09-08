@@ -13,7 +13,7 @@ describe("shouldCallHantei", () => {
 
 describe("runHanteiIfNeeded", () => {
   test("空訳文は run を呼ばない", async () => {
-    const run = vi.fn(async (): Promise<Hantei> => ({
+    const run = vi.fn<() => Promise<Hantei>>(async () => ({
       tekisetsu: true,
       imi: true,
       bunpo: true,
@@ -25,7 +25,7 @@ describe("runHanteiIfNeeded", () => {
   });
 
   test("非空は run して補正する", async () => {
-    const run = vi.fn(async (): Promise<Hantei> => ({
+    const run = vi.fn<() => Promise<Hantei>>(async () => ({
       tekisetsu: true,
       imi: true,
       bunpo: false,
