@@ -1,5 +1,5 @@
 import { useState, type FormEvent } from "react";
-import { OLLAMA_MODELS, type Settings as SettingsValue } from "./ollama";
+import { isOllamaModel, OLLAMA_MODELS, type Settings as SettingsValue } from "./ollama";
 
 export function Settings({
   value,
@@ -68,9 +68,7 @@ function SettingsForm({
             {model}
           </option>
         ))}
-        {!OLLAMA_MODELS.includes(ollamaModel as (typeof OLLAMA_MODELS)[number]) ? (
-          <option value={ollamaModel}>{ollamaModel}</option>
-        ) : null}
+        {!isOllamaModel(ollamaModel) ? <option value={ollamaModel}>{ollamaModel}</option> : null}
       </select>
       <button type="submit" disabled={!canSubmit}>
         保存
