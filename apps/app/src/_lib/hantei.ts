@@ -7,7 +7,7 @@ export type Hantei = {
 };
 
 /** 訳文が空なら LLM を呼ばない。 */
-export function shouldCallHantei(yakubun: string): boolean {
+function shouldCallHantei(yakubun: string): boolean {
   return yakubun !== "";
 }
 
@@ -15,7 +15,7 @@ export function shouldCallHantei(yakubun: string): boolean {
  * 応答を仕様どおりに直す。
  * `tekisetsu` は `imi && bunpo` に合わせ、不適切なら shiteki、適切なら hinto を捨てる。
  */
-export function normalizeHantei(raw: Hantei): Hantei {
+function normalizeHantei(raw: Hantei): Hantei {
   const tekisetsu = raw.imi && raw.bunpo;
   return {
     tekisetsu,

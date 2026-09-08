@@ -30,6 +30,9 @@
     },
     "clean": {
       "cache": false
+    },
+    "//#dead-code": {
+      "cache": false
     }
   }
 }
