@@ -17,12 +17,6 @@ export type GenbunSummary = {
   createdAt: string;
 };
 
-/** 原文の先頭行。空なら空文字。 */
-export function firstLine(body: string): string {
-  const line = body.split(/\r?\n/, 1)[0];
-  return line ?? "";
-}
-
 export function isGakushuGengo(value: string): value is GakushuGengo {
   return value === "en" || value === "zh_hans" || value === "ko" || value === "de";
 }

@@ -1,6 +1,6 @@
 import { describe, expect, test } from "vitest";
 import { fromRecord, startGenbun, toRecord, type GenbunSession } from "./genbun";
-import { firstLine, isGakushuGengo, type GenbunRecord } from "./store";
+import { isGakushuGengo, type GenbunRecord } from "./store";
 
 function savedSession(): GenbunSession {
   return {
@@ -22,24 +22,6 @@ function savedSession(): GenbunSession {
     selectedIndex: 0,
   };
 }
-
-describe("firstLine", () => {
-  test("複数行から先頭だけ", () => {
-    expect(firstLine("hello\nworld")).toBe("hello");
-  });
-
-  test("空文字", () => {
-    expect(firstLine("")).toBe("");
-  });
-
-  test("改行のみ", () => {
-    expect(firstLine("\n次")).toBe("");
-  });
-
-  test("CRLF でも先頭行", () => {
-    expect(firstLine("一行目\r\n二行目")).toBe("一行目");
-  });
-});
 
 describe("isGakushuGengo", () => {
   test("定義どおり受け付ける", () => {
