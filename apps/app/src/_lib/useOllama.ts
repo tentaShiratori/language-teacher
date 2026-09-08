@@ -38,8 +38,9 @@ export function useOllama() {
       const nextStatus = await saveSettings(next);
       setSettings(next);
       setStatus(nextStatus);
-    } catch {
+    } catch (e) {
       setStatus({ kind: "unreachable" });
+      throw e;
     }
   }
 
@@ -47,8 +48,9 @@ export function useOllama() {
     try {
       const nextStatus = await fetchOllamaStatus();
       setStatus(nextStatus);
-    } catch {
+    } catch (e) {
       setStatus({ kind: "unreachable" });
+      throw e;
     }
   }
 

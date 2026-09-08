@@ -1,4 +1,11 @@
 [[permission]]
 identifier = "allow-store"
 description = "原文と文の保存・一覧・読込・削除"
-commands.allow = ["save_genbun", "list_genbun", "load_genbun", "delete_genbun"]
+commands.allow = [
+  "save_genbun",
+  "list_genbun",
+  "load_genbun",
+  "delete_genbun",
+  "ollama_status",
+  "hantei_bun",
+]
