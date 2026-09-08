@@ -7,7 +7,6 @@ use ts_rs::TS;
 
 #[derive(Debug, Clone, Serialize, Deserialize, PartialEq, Eq, TS)]
 #[serde(rename_all = "camelCase")]
-#[ts(export)]
 pub struct Hantei {
     pub tekisetsu: bool,
     pub imi: bool,
