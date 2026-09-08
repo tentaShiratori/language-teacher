@@ -1,0 +1,33 @@
+import { useEffect, useState } from "react";
+import { listHanteiLog, type HanteiLogLine } from "./store";
+
+export type HanteiLogStatus = "loading" | "ok" | "error";
+
+export function useHanteiLog(): { items: HanteiLogLine[]; status: HanteiLogStatus } {
+  const [items, setItems] = useState<HanteiLogLine[]>([]);
+  const [status, setStatus] = useState<HanteiLogStatus>("loading");
+
+  useEffect(() => {
+    let alive = true;
+    void listHanteiLog()
+      .then((lines) => {
+        if (!alive) {
+          return;
+        }
+        setItems(lines);
+        setStatus("ok");
+      })
+      .catch(() => {
+        if (!alive) {
+          return;
+        }
+        setItems([]);
+        setStatus("error");
+      });
+    return () => {
+      alive = false;
+    };
+  }, []);
+
+  return { items, status };
+}
