@@ -1,5 +1,7 @@
+use crate::hantei_log::{write_attempt, HanteiLogPath};
 use crate::store::Store;
 use serde::{Deserialize, Serialize};
+use std::path::Path;
 use tauri::State;
 
 #[derive(Debug, Clone, Serialize, Deserialize, PartialEq, Eq)]
@@ -181,6 +183,7 @@ pub fn request_hantei(
     genbun: &str,
     bun: &str,
     yakubun: &str,
+    log_path: Option<&Path>,
 ) -> Result<Hantei, String> {
     if yakubun.is_empty() {
         return Err("空の訳文は判定しない".to_string());
@@ -193,11 +196,11 @@ pub fn request_hantei(
         messages: vec![
             ChatMessage {
                 role: "system".to_string(),
-                content: system,
+                content: system.clone(),
             },
             ChatMessage {
                 role: "user".to_string(),
-                content: user,
+                content: user.clone(),
             },
         ],
         stream: false,
@@ -206,15 +209,63 @@ pub fn request_hantei(
 
     let mut last_err = String::new();
     for _ in 0..2 {
-        match call_chat_once(&url, &body) {
-            Ok(hantei) => return Ok(hantei),
-            Err(err) => last_err = err,
+        match fetch_chat_content(&url, &body) {
+            Ok(content) => match parse_hantei_content(&content) {
+                Ok(hantei) => {
+                    log_attempt(
+                        log_path,
+                        model,
+                        &system,
+                        &user,
+                        Some(&content),
+                        Ok(&hantei),
+                    );
+                    return Ok(hantei);
+                }
+                Err(err) => {
+                    log_attempt(
+                        log_path,
+                        model,
+                        &system,
+                        &user,
+                        Some(&content),
+                        Err(&err),
+                    );
+                    last_err = err;
+                }
+            },
+            Err(err) => {
+                log_attempt(log_path, model, &system, &user, None, Err(&err));
+                last_err = err;
+            }
         }
     }
     Err(last_err)
 }
 
-fn call_chat_once(url: &str, body: &ChatRequest) -> Result<Hantei, String> {
+fn log_attempt(
+    log_path: Option<&Path>,
+    model: &str,
+    system_prompt: &str,
+    user_prompt: &str,
+    message_content: Option<&str>,
+    outcome: Result<&Hantei, &str>,
+) {
+    let Some(path) = log_path else {
+        return;
+    };
+    let _ = write_attempt(
+        path,
+        crate::hantei_log::now_iso(),
+        model,
+        system_prompt,
+        user_prompt,
+        message_content,
+        outcome,
+    );
+}
+
+fn fetch_chat_content(url: &str, body: &ChatRequest) -> Result<String, String> {
     let response = ureq::post(url)
         .set("Content-Type", "application/json")
         .send_json(body)
@@ -223,17 +274,17 @@ fn call_chat_once(url: &str, body: &ChatRequest) -> Result<Hantei, String> {
         return Err(format!("chat completions HTTP {}", response.status()));
     }
     let parsed: ChatResponse = response.into_json().map_err(|e| e.to_string())?;
-    let content = parsed
+    parsed
         .choices
         .first()
-        .and_then(|c| c.message.content.as_ref())
-        .ok_or_else(|| "choices が空".to_string())?;
-    parse_hantei_content(content)
+        .and_then(|c| c.message.content.clone())
+        .ok_or_else(|| "choices が空".to_string())
 }
 
 #[tauri::command]
 pub async fn hantei_bun(
     store: State<'_, Store>,
+    log_path: State<'_, HanteiLogPath>,
     gakushu_gengo: String,
     genbun: String,
     bun: String,
@@ -242,6 +293,7 @@ pub async fn hantei_bun(
     let settings = store.load_settings()?;
     let base_url = settings.ollama_base_url;
     let model = settings.ollama_model;
+    let log_path = log_path.0.clone();
     tauri::async_runtime::spawn_blocking(move || {
         request_hantei(
             &base_url,
@@ -250,6 +302,7 @@ pub async fn hantei_bun(
             &genbun,
             &bun,
             &yakubun,
+            Some(&log_path),
         )
     })
     .await
@@ -326,9 +379,33 @@ mod tests {
             "原文",
             "文",
             "",
+            None,
         )
         .unwrap_err();
         assert!(err.contains("空"));
+    }
+
+    #[test]
+    fn empty_yakubun_does_not_write_log() {
+        let path = std::env::temp_dir().join(format!(
+            "language_teacher_hantei_empty_{}.jsonl",
+            std::time::SystemTime::now()
+                .duration_since(std::time::UNIX_EPOCH)
+                .unwrap()
+                .as_nanos()
+        ));
+        let err = request_hantei(
+            "http://127.0.0.1:1",
+            "qwen3:8b",
+            "en",
+            "原文",
+            "文",
+            "",
+            Some(&path),
+        )
+        .unwrap_err();
+        assert!(err.contains("空"));
+        assert!(!path.exists());
     }
 
     #[test]

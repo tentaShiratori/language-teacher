@@ -1,8 +1,10 @@
 mod hantei;
+mod hantei_log;
 mod ollama;
 mod store;
 
 use hantei::hantei_bun;
+use hantei_log::{hantei_log_path, HanteiLogPath};
 use ollama::{load_settings, ollama_status, save_settings};
 use store::{delete_genbun, list_genbun, load_genbun, save_genbun, Store};
 use tauri::Manager;
@@ -17,6 +19,7 @@ pub fn run() {
             let db_path = dir.join("store.sqlite");
             let store = Store::open(&db_path).map_err(|e| e.to_string())?;
             app.manage(store);
+            app.manage(HanteiLogPath(hantei_log_path(&dir)));
             Ok(())
         })
         .invoke_handler(tauri::generate_handler![
