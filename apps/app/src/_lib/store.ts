@@ -1,23 +1,13 @@
 import { invoke } from "@tauri-apps/api/core";
-import type { Bun } from "./bun";
+import type { GenbunRecord } from "../bindings/GenbunRecord";
+import type { GenbunSummary } from "../bindings/GenbunSummary";
+import type { Hantei } from "../bindings/Hantei";
+import type { OllamaStatus } from "../bindings/OllamaStatus";
+import type { Settings } from "../bindings/Settings";
 import type { GakushuGengo } from "./gakushu_gengo";
-import type { Hantei } from "./hantei";
-import type { OllamaStatus, Settings } from "./ollama";
 
-export type GenbunRecord = {
-  id: string;
-  body: string;
-  gakushuGengo: GakushuGengo;
-  createdAt: string;
-  buns: Bun[];
-};
-
-export type GenbunSummary = {
-  id: string;
-  firstLine: string;
-  gakushuGengo: GakushuGengo;
-  createdAt: string;
-};
+export type { GenbunRecord } from "../bindings/GenbunRecord";
+export type { GenbunSummary } from "../bindings/GenbunSummary";
 
 export function isGakushuGengo(value: string): value is GakushuGengo {
   return value === "en" || value === "zh_hans" || value === "ko" || value === "de";

@@ -1,0 +1,3 @@
+[env]
+# IPC 共有型の TypeScript 生成先（`src/_lib/` の隣）
+TS_RS_EXPORT_DIR = { value = "../src/bindings", relative = true }

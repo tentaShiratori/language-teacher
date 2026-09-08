@@ -1,19 +1,15 @@
+import type { OllamaStatus } from "../bindings/OllamaStatus";
+import type { Settings } from "../bindings/Settings";
+
+export type { Settings } from "../bindings/Settings";
+export type { OllamaStatus } from "../bindings/OllamaStatus";
+
 const DEFAULT_OLLAMA_BASE_URL = "http://127.0.0.1:11434";
 const DEFAULT_OLLAMA_MODEL = "qwen3:8b";
 
 export const OLLAMA_MODELS = ["qwen3:8b", "qwen3:14b"] as const;
 
 export type OllamaModel = (typeof OLLAMA_MODELS)[number];
-
-export type Settings = {
-  ollamaBaseUrl: string;
-  ollamaModel: string;
-};
-
-export type OllamaStatus =
-  | { kind: "ok" }
-  | { kind: "unreachable" }
-  | { kind: "modelMissing"; model: string };
 
 export function defaultSettings(): Settings {
   return {

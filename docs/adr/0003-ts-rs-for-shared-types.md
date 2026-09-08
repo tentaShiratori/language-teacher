@@ -18,6 +18,7 @@ Rust と TypeScript で同じ JSON の形を手書きしたくない。候補は
 
 ## Consequences
 
-- 生成型は `apps/app/src/_lib/` に置き、`store.ts` の手書き型を寄せる。`invoke` は残す
+- 生成型は `apps/app/src/bindings/`（`_lib/` の隣）に置き、手書きの IPC 型を寄せる。`invoke` は `store.ts` に残す
+- 更新は `apps/app/src-tauri` で `cargo test export_bindings`（または `cargo test`）。生成物はコミットする
 - コマンドの登録の仕方は変えない
 - Specta が Tauri 2 で安定したら、口の生成を足す余地はある。今は採らない

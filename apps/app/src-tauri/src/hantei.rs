@@ -3,9 +3,11 @@ use crate::store::Store;
 use serde::{Deserialize, Serialize};
 use std::path::Path;
 use tauri::State;
+use ts_rs::TS;
 
-#[derive(Debug, Clone, Serialize, Deserialize, PartialEq, Eq)]
+#[derive(Debug, Clone, Serialize, Deserialize, PartialEq, Eq, TS)]
 #[serde(rename_all = "camelCase")]
+#[ts(export)]
 pub struct Hantei {
     pub tekisetsu: bool,
     pub imi: bool,

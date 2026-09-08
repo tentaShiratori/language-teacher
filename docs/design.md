@@ -41,6 +41,7 @@ apps/app/
     main.tsx
     App.tsx
     globals.css
+    bindings/          # ts-rs 生成物（手編集しない。コミットする）
     _lib/
       GenbunPaste.tsx
       GakushuGengoSelect.tsx
@@ -56,17 +57,27 @@ apps/app/
       bun.ts
       hantei.ts
       gakushu_gengo.ts
+      store.ts          # invoke 包み。型は bindings を再 export
       *.test.ts
       *.test.tsx
   src-tauri/
     tauri.conf.json
     Cargo.toml
+    .cargo/config.toml # TS_RS_EXPORT_DIR → ../src/bindings
     src/
       lib.rs
       ollama.rs
       hantei.rs
       store.rs
 ```
+
+### 共有型の更新（ts-rs）
+
+IPC を跨ぐ型（`GenbunRecord` / `GenbunSummary` / `BunRecord` / `Settings` / `OllamaStatus` / `Hantei`）は Rust に `#[derive(TS)]` と `#[ts(export)]` を付け、`serde(rename_all = "camelCase")` と揃える（[ADR 0003](./adr/0003-ts-rs-for-shared-types.md)）。
+
+1. `apps/app/src-tauri` で `cargo test export_bindings`（または `cargo test`）を走らせる
+2. `apps/app/src/bindings/` に TypeScript が書き出される
+3. 生成物の差分をコミットする。フロントの `invoke` 包み（`store.ts`）は残す
 
 Rust のコマンド（IPC）は次だけ。保存の中身はコマンドの向こうに閉じる。
 
