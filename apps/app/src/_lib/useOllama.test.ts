@@ -100,4 +100,19 @@ describe("useOllama", () => {
     expect(result.current.canHantei).toBe(false);
     expect(result.current.status).toEqual({ kind: "unreachable" });
   });
+
+  test("設定読込だけ失敗しても検知結果は残す", async () => {
+    vi.mocked(store.loadSettings).mockRejectedValue(new Error("ipc"));
+    vi.mocked(store.fetchOllamaStatus).mockResolvedValue({ kind: "ok" });
+
+    const { result } = renderHook(() => useOllama());
+    await waitFor(() => expect(result.current.ready).toBe(true));
+
+    expect(result.current.canHantei).toBe(true);
+    expect(result.current.status).toEqual({ kind: "ok" });
+    expect(result.current.settings).toEqual({
+      ollamaBaseUrl: "http://127.0.0.1:11434",
+      ollamaModel: "qwen3:8b",
+    });
+  });
 });

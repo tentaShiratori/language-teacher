@@ -17,7 +17,7 @@ pre-commit:
 
     - name: dead-code
       glob: "*.{js,jsx,ts,tsx,mjs,cjs,mts,cts}"
-      run: pnpm exec dead-code
+      run: pnpm dead-code
 
     - name: gofmt
       glob: "*.go"
