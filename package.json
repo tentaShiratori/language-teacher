@@ -13,7 +13,7 @@
     "typecheck": "turbo typecheck",
     "test": "turbo run test",
     "test:run": "turbo run test:run",
-    "tauri": "pnpm --filter @kakeibo/app tauri"
+    "tauri": "pnpm --filter @language-teacher/app tauri"
   },
   "devDependencies": {
     "@types/node": "^26.4.1",

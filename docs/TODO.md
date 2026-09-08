@@ -6,11 +6,11 @@
 
 ## 0. 土台
 
-- [ ] `apps/app` に Tauri + React + Vite を足す。パッケージ名は `@language-teacher/app`
-- [ ] ルート `package.json` の `"tauri": "pnpm --filter @kakeibo/app tauri"` を `@language-teacher/app` に直す
-- [ ] `turbo.json` に `apps/app` の `dev` / `build` / `typecheck` / `test` / `test:run` が乗ることを確認する。Tauri の成果物を `outputs` に誤って `.next` だけ見ない
-- [ ] 家計簿名残のうち、この作業で触るファイルだけ直す（`package.json` の filter は必須。他は触ったとき）
-- [ ] `pnpm --filter @language-teacher/app tauri dev` で空ウィンドウが開く
+- [x] `apps/app` に Tauri + React + Vite を足す。パッケージ名は `@language-teacher/app`
+- [x] ルート `package.json` の `"tauri": "pnpm --filter @kakeibo/app tauri"` を `@language-teacher/app` に直す
+- [x] `turbo.json` に `apps/app` の `dev` / `build` / `typecheck` / `test` / `test:run` が乗ることを確認する。Tauri の成果物を `outputs` に誤って `.next` だけ見ない
+- [x] 家計簿名残のうち、この作業で触るファイルだけ直す（`package.json` の filter は必須。他は触ったとき）
+- [x] `pnpm --filter @language-teacher/app tauri dev` で空ウィンドウが開く
 
 完了: ウィンドウが開き、`apps/web` も `api` も無い。
 

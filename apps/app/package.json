@@ -1,5 +1,5 @@
 {
-  "name": "language_teacher",
+  "name": "@language-teacher/app",
   "version": "0.1.0",
   "private": true,
   "type": "module",
