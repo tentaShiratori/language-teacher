@@ -5,28 +5,31 @@ import { openHanteiLogMado } from "./openHanteiLogMado";
 const HANTEI_LOG_MADO_LABEL = "hantei-log";
 const HANTEI_LOG_MADO_URL = `/#${HANTEI_LOG_PATH}`;
 
-const getByLabel = vi.fn<() => Promise<{ setFocus: () => Promise<void> } | null>>();
-const setFocus = vi.fn<() => Promise<void>>();
-const once = vi.fn<(event: string, handler: (...args: never[]) => void) => void>();
+const { constructed, getByLabel, setFocus, once } = vi.hoisted(() => {
+  const constructed: Array<{
+    label: string;
+    options: { url: string; title: string; width: number; height: number };
+  }> = [];
+  return {
+    constructed,
+    getByLabel: vi.fn<(label: string) => Promise<{ setFocus: () => Promise<void> } | null>>(),
+    setFocus: vi.fn<() => Promise<void>>(),
+    once: vi.fn<(event: string, handler: (event?: { payload: string }) => void) => void>(),
+  };
+});
 
-vi.mock("@tauri-apps/api/webviewWindow", () => {
-  class WebviewWindow {
-    static getByLabel = (...args: unknown[]) => getByLabel(...args);
-    once = (...args: unknown[]) => once(...args);
+vi.mock("@tauri-apps/api/webviewWindow", () => ({
+  WebviewWindow: class {
+    static getByLabel = getByLabel;
+    once = once;
     constructor(
       public label: string,
       public options: { url: string; title: string; width: number; height: number },
     ) {
       constructed.push({ label, options });
     }
-  }
-  return { WebviewWindow };
-});
-
-const constructed: Array<{
-  label: string;
-  options: { url: string; title: string; width: number; height: number };
-}> = [];
+  },
+}));
 
 describe("openHanteiLogMado", () => {
   beforeEach(() => {
@@ -49,7 +52,7 @@ describe("openHanteiLogMado", () => {
 
   test("無ければ第2ウィンドウを作る", async () => {
     getByLabel.mockResolvedValue(null);
-    once.mockImplementation((event: string, handler: () => void) => {
+    once.mockImplementation((event, handler) => {
       if (event === "tauri://created") {
         handler();
       }
@@ -72,7 +75,7 @@ describe("openHanteiLogMado", () => {
 
   test("作成失敗なら拒否する", async () => {
     getByLabel.mockResolvedValue(null);
-    once.mockImplementation((event: string, handler: (event: { payload: string }) => void) => {
+    once.mockImplementation((event, handler) => {
       if (event === "tauri://error") {
         handler({ payload: "denied" });
       }

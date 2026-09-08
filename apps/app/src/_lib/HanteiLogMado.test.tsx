@@ -1,12 +1,11 @@
 import { render, screen, waitFor } from "@testing-library/react";
 import { beforeEach, describe, expect, test, vi } from "vitest";
 import { HanteiLogMado } from "./HanteiLogMado";
+import * as store from "./store";
 import type { HanteiLogLine } from "./store";
 
-const listHanteiLog = vi.fn<() => Promise<HanteiLogLine[]>>();
-
 vi.mock("./store", () => ({
-  listHanteiLog: (...args: unknown[]) => listHanteiLog(...args),
+  listHanteiLog: vi.fn<() => Promise<HanteiLogLine[]>>(),
 }));
 
 function baseLine(overrides: Partial<HanteiLogLine> = {}): HanteiLogLine {
@@ -22,17 +21,17 @@ function baseLine(overrides: Partial<HanteiLogLine> = {}): HanteiLogLine {
 
 describe("HanteiLogMado", () => {
   beforeEach(() => {
-    listHanteiLog.mockReset();
+    vi.mocked(store.listHanteiLog).mockReset();
   });
 
   test("空ならログなしと出す", async () => {
-    listHanteiLog.mockResolvedValue([]);
+    vi.mocked(store.listHanteiLog).mockResolvedValue([]);
     render(<HanteiLogMado />);
     expect(await screen.findByText("ログはまだありません")).toBeTruthy();
   });
 
   test("成功行はプロンプト・応答・判定を出す", async () => {
-    listHanteiLog.mockResolvedValue([
+    vi.mocked(store.listHanteiLog).mockResolvedValue([
       baseLine({
         hantei: {
           tekisetsu: true,
@@ -50,7 +49,7 @@ describe("HanteiLogMado", () => {
   });
 
   test("失敗行はパース失敗を出す", async () => {
-    listHanteiLog.mockResolvedValue([
+    vi.mocked(store.listHanteiLog).mockResolvedValue([
       baseLine({
         messageContent: "not json",
         error: "JSON オブジェクトが無い",
@@ -61,7 +60,7 @@ describe("HanteiLogMado", () => {
   });
 
   test("読み込み失敗ならエラーを出す", async () => {
-    listHanteiLog.mockRejectedValue(new Error("boom"));
+    vi.mocked(store.listHanteiLog).mockRejectedValue(new Error("boom"));
     render(<HanteiLogMado />);
     await waitFor(() => {
       expect(screen.getByText("ログを読めませんでした")).toBeTruthy();

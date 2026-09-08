@@ -1,17 +1,16 @@
 import { fireEvent, render, screen } from "@testing-library/react";
 import { beforeEach, describe, expect, test, vi } from "vitest";
 import { Settings } from "./Settings";
-
-const openHanteiLogMado = vi.fn<() => Promise<void>>();
+import * as mado from "./openHanteiLogMado";
 
 vi.mock("./openHanteiLogMado", () => ({
-  openHanteiLogMado: (...args: unknown[]) => openHanteiLogMado(...args),
+  openHanteiLogMado: vi.fn<() => Promise<void>>(),
 }));
 
 describe("Settings", () => {
   beforeEach(() => {
-    openHanteiLogMado.mockReset();
-    openHanteiLogMado.mockResolvedValue(undefined);
+    vi.mocked(mado.openHanteiLogMado).mockReset();
+    vi.mocked(mado.openHanteiLogMado).mockResolvedValue(undefined);
   });
 
   test("判定ログボタンは別ウィンドウを開き、ログ本体は埋め込まない", () => {
@@ -23,7 +22,7 @@ describe("Settings", () => {
     );
     fireEvent.click(screen.getByRole("button", { name: "設定" }));
     fireEvent.click(screen.getByRole("button", { name: "判定ログ" }));
-    expect(openHanteiLogMado).toHaveBeenCalledTimes(1);
+    expect(mado.openHanteiLogMado).toHaveBeenCalledTimes(1);
     expect(screen.queryByLabelText("判定ログ")).toBeNull();
     expect(screen.queryByText("ログはまだありません")).toBeNull();
   });
