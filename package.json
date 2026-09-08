@@ -1,0 +1,27 @@
+{
+  "name": "language-teacher",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "build": "turbo build",
+    "dev": "turbo dev",
+    "lint": "turbo lint",
+    "fmt": "oxfmt && turbo fmt",
+    "fmt:check": "oxfmt --check && turbo fmt:check",
+    "dead-code": "fallow dead-code && fallow dead-code --production",
+    "clean": "turbo clean",
+    "typecheck": "turbo typecheck",
+    "test": "turbo run test",
+    "test:run": "turbo run test:run",
+    "tauri": "pnpm --filter @kakeibo/app tauri"
+  },
+  "devDependencies": {
+    "@types/node": "^26.4.1",
+    "fallow": "^3.22.0",
+    "oxfmt": "^0.66.0",
+    "skills": "^1.5.23",
+    "turbo": "^2.3.3",
+    "typescript": "7.0.2"
+  },
+  "packageManager": "pnpm@11.17.0"
+}
