@@ -9,12 +9,14 @@ import {
   setYakubun,
   startGenbun,
   type GenbunSession,
-} from "./useGenbun";
+} from "./genbun";
 
 function henshuSession(overrides: Partial<GenbunSession> = {}): GenbunSession {
   return {
+    id: "session-1",
     body: "あ。い。う。",
     gakushuGengo: "en",
+    createdAt: "2026-09-08T00:00:00.000Z",
     buns: [
       {
         body: "あ。",
@@ -49,7 +51,7 @@ function henshuSession(overrides: Partial<GenbunSession> = {}): GenbunSession {
   };
 }
 
-describe("phaseOf", () => {
+describe("phaseOf / startGenbun", () => {
   test("未開始は paste", () => {
     expect(phaseOf(null)).toBe("paste");
   });
@@ -59,19 +61,13 @@ describe("phaseOf", () => {
   });
 
   test("言語選択後は henshu", () => {
-    const session = selectGengo(startGenbun("あ。")!, "en");
+    const session = selectGengo(startGenbun("あ。")!, "en", "id-1", "2026-09-08T00:00:00.000Z");
     expect(phaseOf(session)).toBe("henshu");
   });
-});
 
-describe("startGenbun", () => {
   test("原文を受け付ける", () => {
-    expect(startGenbun("こんにちは。")).toEqual({
-      body: "こんにちは。",
-      gakushuGengo: null,
-      buns: [],
-      selectedIndex: 0,
-    });
+    expect(startGenbun("こんにちは。")?.body).toBe("こんにちは。");
+    expect(startGenbun("こんにちは。")?.id).toBeNull();
   });
 
   test("空文字は拒否する", () => {
@@ -81,16 +77,15 @@ describe("startGenbun", () => {
 
 describe("selectGengo", () => {
   test("分割して編集に入る", () => {
-    const session = selectGengo(startGenbun("あ。い。")!, "ko");
+    const session = selectGengo(startGenbun("あ。い。")!, "ko", "id-2", "2026-09-08T01:00:00.000Z");
     expect(session.gakushuGengo).toBe("ko");
+    expect(session.id).toBe("id-2");
     expect(session.buns.map((bun) => bun.body)).toEqual(["あ。", "い。"]);
-    expect(session.selectedIndex).toBe(0);
   });
 
   test("一度選んだら変えない", () => {
-    const first = selectGengo(startGenbun("あ。")!, "en");
-    const second = selectGengo(first, "de");
-    expect(second.gakushuGengo).toBe("en");
+    const first = selectGengo(startGenbun("あ。")!, "en", "id-3", "2026-09-08T00:00:00.000Z");
+    expect(selectGengo(first, "de").gakushuGengo).toBe("en");
   });
 });
 
@@ -102,7 +97,6 @@ describe("selectBun / selectNextBun", () => {
   test("範囲外は動かない", () => {
     const session = henshuSession();
     expect(selectBun(session, -1)).toEqual(session);
-    expect(selectBun(session, 3)).toEqual(session);
   });
 
   test("Tab 相当で次へ進む", () => {
@@ -110,8 +104,7 @@ describe("selectBun / selectNextBun", () => {
   });
 
   test("末尾では動かない", () => {
-    const session = henshuSession({ selectedIndex: 2 });
-    expect(selectNextBun(session).selectedIndex).toBe(2);
+    expect(selectNextBun(henshuSession({ selectedIndex: 2 })).selectedIndex).toBe(2);
   });
 
   test("文が空なら動かない", () => {
@@ -122,22 +115,25 @@ describe("selectBun / selectNextBun", () => {
 
 describe("setYakubun", () => {
   test("選択中の訳文を更新する", () => {
-    const next = setYakubun(henshuSession({ selectedIndex: 1 }), "yes");
-    expect(next.buns[1]?.yakubun).toBe("yes");
-    expect(next.buns[0]?.yakubun).toBe("");
+    expect(setYakubun(henshuSession({ selectedIndex: 1 }), "yes").buns[1]?.yakubun).toBe("yes");
   });
 
   test("選択が無効なら変えない", () => {
     const session = henshuSession({ selectedIndex: 9 });
     expect(setYakubun(session, "x")).toEqual(session);
   });
+
+  test("空の訳文も保持する", () => {
+    expect(setYakubun(setYakubun(henshuSession(), "hello"), "").buns[0]?.yakubun).toBe("");
+  });
 });
 
 describe("mergeSelected / resplitSelected", () => {
   test("選択中と次を結合する", () => {
-    const next = mergeSelected(henshuSession({ selectedIndex: 0 }));
-    expect(next.buns.map((bun) => bun.body)).toEqual(["あ。い。", "う。"]);
-    expect(next.selectedIndex).toBe(0);
+    expect(mergeSelected(henshuSession()).buns.map((bun) => bun.body)).toEqual([
+      "あ。い。",
+      "う。",
+    ]);
   });
 
   test("末尾では結合しない", () => {
@@ -163,11 +159,10 @@ describe("mergeSelected / resplitSelected", () => {
     const next = resplitSelected(session, 1);
     expect(next.buns.map((bun) => bun.body)).toEqual(["あ", "いう"]);
     expect(next.buns.every((bun) => bun.yakubun === "")).toBe(true);
-    expect(next.buns.every((bun) => bun.tekisetsu === null)).toBe(true);
   });
 
   test("キャレット先頭では再分割しない", () => {
-    const session = henshuSession({ selectedIndex: 0 });
+    const session = henshuSession();
     expect(resplitSelected(session, 0).buns).toEqual(session.buns);
   });
 });

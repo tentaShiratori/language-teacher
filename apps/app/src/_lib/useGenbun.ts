@@ -1,114 +1,70 @@
-import { useState } from "react";
-import { mergeBun, resplitBun, splitBun, type Bun } from "./bun";
+import { useEffect, useState } from "react";
+import {
+  fromRecord,
+  mergeSelected,
+  phaseOf,
+  resplitSelected,
+  selectBun,
+  selectGengo,
+  selectNextBun,
+  setYakubun,
+  startGenbun,
+  toRecord,
+  type GenbunSession,
+} from "./genbun";
 import type { GakushuGengo } from "./gakushu_gengo";
+import { deleteGenbun, listGenbun, loadGenbun, saveGenbun, type GenbunSummary } from "./store";
 
-export type GenbunPhase = "paste" | "gengo" | "henshu";
+export type { GenbunPhase, GenbunSession } from "./genbun";
+export {
+  fromRecord,
+  mergeSelected,
+  phaseOf,
+  resplitSelected,
+  selectBun,
+  selectGengo,
+  selectNextBun,
+  setYakubun,
+  startGenbun,
+  toRecord,
+} from "./genbun";
 
-export type GenbunSession = {
-  body: string;
-  gakushuGengo: GakushuGengo | null;
-  buns: Bun[];
-  selectedIndex: number;
-};
-
-function toBun(body: string): Bun {
-  return {
-    body,
-    yakubun: "",
-    tekisetsu: null,
-    imi: null,
-    bunpo: null,
-    shiteki: null,
-    hinto: null,
-  };
-}
-
-export function phaseOf(session: GenbunSession | null): GenbunPhase {
-  if (session === null) {
-    return "paste";
+async function persist(session: GenbunSession): Promise<void> {
+  const record = toRecord(session);
+  if (record === null) {
+    return;
   }
-  if (session.gakushuGengo === null) {
-    return "gengo";
-  }
-  return "henshu";
-}
-
-/** 空の原文は受け付けない。 */
-export function startGenbun(body: string): GenbunSession | null {
-  if (body === "") {
-    return null;
-  }
-  return {
-    body,
-    gakushuGengo: null,
-    buns: [],
-    selectedIndex: 0,
-  };
-}
-
-/** 学習言語は一度選んだら変えない。 */
-export function selectGengo(session: GenbunSession, gengo: GakushuGengo): GenbunSession {
-  if (session.gakushuGengo !== null) {
-    return session;
-  }
-  const buns = splitBun(session.body).map(toBun);
-  return {
-    ...session,
-    gakushuGengo: gengo,
-    buns,
-    selectedIndex: 0,
-  };
-}
-
-export function selectBun(session: GenbunSession, index: number): GenbunSession {
-  if (index < 0 || index >= session.buns.length) {
-    return session;
-  }
-  return { ...session, selectedIndex: index };
-}
-
-/** 次の文へ。末尾では動かない。 */
-export function selectNextBun(session: GenbunSession): GenbunSession {
-  if (session.buns.length === 0) {
-    return session;
-  }
-  const next = Math.min(session.selectedIndex + 1, session.buns.length - 1);
-  return { ...session, selectedIndex: next };
-}
-
-export function setYakubun(session: GenbunSession, yakubun: string): GenbunSession {
-  const index = session.selectedIndex;
-  if (index < 0 || index >= session.buns.length) {
-    return session;
-  }
-  const target = session.buns[index]!;
-  const nextBun: Bun = { ...target, yakubun };
-  return {
-    ...session,
-    buns: [...session.buns.slice(0, index), nextBun, ...session.buns.slice(index + 1)],
-  };
-}
-
-export function mergeSelected(session: GenbunSession): GenbunSession {
-  const buns = mergeBun(session.buns, session.selectedIndex);
-  const max = Math.max(0, buns.length - 1);
-  return {
-    ...session,
-    buns,
-    selectedIndex: Math.min(session.selectedIndex, max),
-  };
-}
-
-export function resplitSelected(session: GenbunSession, caret: number): GenbunSession {
-  return {
-    ...session,
-    buns: resplitBun(session.buns, session.selectedIndex, caret),
-  };
+  await saveGenbun(record);
 }
 
 export function useGenbun() {
   const [session, setSession] = useState<GenbunSession | null>(null);
+  const [ichiran, setIchiran] = useState<GenbunSummary[]>([]);
   const phase = phaseOf(session);
+
+  useEffect(() => {
+    let alive = true;
+    void listGenbun()
+      .then((items) => {
+        if (alive) {
+          setIchiran(items);
+        }
+      })
+      .catch(() => {
+        if (alive) {
+          setIchiran([]);
+        }
+      });
+    return () => {
+      alive = false;
+    };
+  }, []);
+
+  function refreshIchiran() {
+    void listGenbun()
+      .then(setIchiran)
+      .catch(() => setIchiran([]));
+  }
 
   function onPaste(body: string) {
     const next = startGenbun(body);
@@ -118,7 +74,14 @@ export function useGenbun() {
   }
 
   function onSelectGengo(gengo: GakushuGengo) {
-    setSession((prev) => (prev === null ? prev : selectGengo(prev, gengo)));
+    setSession((prev) => {
+      if (prev === null) {
+        return prev;
+      }
+      const next = selectGengo(prev, gengo);
+      void persist(next);
+      return next;
+    });
   }
 
   function onSelectBun(index: number) {
@@ -126,28 +89,92 @@ export function useGenbun() {
   }
 
   function onTab() {
-    setSession((prev) => (prev === null ? prev : selectNextBun(prev)));
+    setSession((prev) => {
+      if (prev === null) {
+        return prev;
+      }
+      void persist(prev);
+      return selectNextBun(prev);
+    });
   }
 
   function onCtrlEnter() {
-    // 判定は後続 issue。選択は動かさない。
+    setSession((prev) => {
+      if (prev === null) {
+        return prev;
+      }
+      void persist(prev);
+      return prev;
+    });
   }
 
   function onChangeYakubun(yakubun: string) {
-    setSession((prev) => (prev === null ? prev : setYakubun(prev, yakubun)));
+    setSession((prev) => {
+      if (prev === null) {
+        return prev;
+      }
+      const next = setYakubun(prev, yakubun);
+      void persist(next);
+      return next;
+    });
   }
 
   function onMerge() {
-    setSession((prev) => (prev === null ? prev : mergeSelected(prev)));
+    setSession((prev) => {
+      if (prev === null) {
+        return prev;
+      }
+      const next = mergeSelected(prev);
+      void persist(next);
+      return next;
+    });
   }
 
   function onResplit(caret: number) {
-    setSession((prev) => (prev === null ? prev : resplitSelected(prev, caret)));
+    setSession((prev) => {
+      if (prev === null) {
+        return prev;
+      }
+      const next = resplitSelected(prev, caret);
+      void persist(next);
+      return next;
+    });
+  }
+
+  async function onOpen(id: string) {
+    try {
+      const record = await loadGenbun(id);
+      if (record === null) {
+        return;
+      }
+      const next = fromRecord(record);
+      if (next !== null) {
+        setSession(next);
+      }
+    } catch {
+      // 開けなければそのまま
+    }
+  }
+
+  async function onDelete(id: string) {
+    try {
+      await deleteGenbun(id);
+      setSession((prev) => (prev?.id === id ? null : prev));
+      refreshIchiran();
+    } catch {
+      // 失敗時は一覧を据え置き
+    }
+  }
+
+  function onBackToIchiran() {
+    setSession(null);
+    refreshIchiran();
   }
 
   return {
     session,
     phase,
+    ichiran,
     onPaste,
     onSelectGengo,
     onSelectBun,
@@ -156,5 +183,8 @@ export function useGenbun() {
     onChangeYakubun,
     onMerge,
     onResplit,
+    onOpen,
+    onDelete,
+    onBackToIchiran,
   };
 }
