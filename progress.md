@@ -2,7 +2,7 @@
 
 ## 状態
 
-grilling 完了。設計と TODO を `docs/` に書いた。実装は始めていない。
+issue #3（学習言語と文の分割）の純関数を実装済み。`splitBun` / `mergeBun` / `resplitBun` と `gakushu_gengo`。テスト 18 件パス。
 
 ## 意思決定
 
@@ -16,7 +16,9 @@ grilling 完了。設計と TODO を `docs/` に書いた。実装は始めて�
 - 原文・訳文・判定を端末に残す
 - Tauri のみ（ADR 0001）。Ollama（ADR 0002）。既定 qwen3:8b、設定で 14b
 - Ollama 未導入は起動時に検知し、アプリ上に `docs/ollama.md` と同じ手順を出す
+- `splitBun` は `。！？．` の直後と改行で切る。鉤括弧内も同じ。空断片は捨てる
+- `mergeBun` / `resplitBun` は判定フィールドを null に戻す。再分割時の訳文は両方空
 
 ## 次セッション
 
-- `docs/TODO.md` の 0 から実装する（`add-feature` / `write-test`）
+- `docs/TODO.md` の 2（貼り付けと文一覧）へ。必要なら #2 の土台残りを先に

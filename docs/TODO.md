@@ -16,10 +16,10 @@
 
 ## 1. 学習言語と文の分割
 
-- [ ] `src/_lib/gakushu_gengo.ts` — `en` / `zh_hans` / `ko` / `de` と表示名
-- [ ] `src/_lib/bun.ts` — `splitBun`（`。！？．` と改行。空断片を捨てる）
-- [ ] `mergeBun` / `resplitBun`（結合、キャレット位置で再分割。判定は捨てる）
-- [ ] `bun.test.ts` — 通常の句点、末尾に句点なし、連続改行、鉤括弧内の句点、空、結合、再分割
+- [x] `src/_lib/gakushu_gengo.ts` — `en` / `zh_hans` / `ko` / `de` と表示名
+- [x] `src/_lib/bun.ts` — `splitBun`（`。！？．` と改行。空断片を捨てる）
+- [x] `mergeBun` / `resplitBun`（結合、キャレット位置で再分割。判定は捨てる）
+- [x] `bun.test.ts` — 通常の句点、末尾に句点なし、連続改行、鉤括弧内の句点、空、結合、再分割
 
 完了: 純関数だけで、貼った文字列が文の配列になる。
 
