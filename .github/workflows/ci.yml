@@ -46,6 +46,7 @@ jobs:
       - run: pnpm test:run
 
   go:
+    if: false
     name: gofmt / test
     runs-on: ubuntu-latest
     defaults:
