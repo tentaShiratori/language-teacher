@@ -1,5 +1,10 @@
 import { useEffect, useState } from "react";
-import { canHantei, defaultSettings, type OllamaStatus, type Settings } from "./ollama";
+import {
+  canHantei,
+  defaultSettings,
+  type OllamaStatus,
+  type Settings,
+} from "./ollama";
 import { fetchOllamaStatus, loadSettings, saveSettings } from "./store";
 
 export function useOllama() {
@@ -11,7 +16,10 @@ export function useOllama() {
     let alive = true;
     void (async () => {
       try {
-        const [nextSettings, nextStatus] = await Promise.all([loadSettings(), fetchOllamaStatus()]);
+        const [nextSettings, nextStatus] = await Promise.all([
+          loadSettings(),
+          fetchOllamaStatus(),
+        ]);
         if (!alive) {
           return;
         }
@@ -38,8 +46,9 @@ export function useOllama() {
       const nextStatus = await saveSettings(next);
       setSettings(next);
       setStatus(nextStatus);
-    } catch {
+    } catch (e) {
       setStatus({ kind: "unreachable" });
+      throw e;
     }
   }
 
@@ -47,8 +56,9 @@ export function useOllama() {
     try {
       const nextStatus = await fetchOllamaStatus();
       setStatus(nextStatus);
-    } catch {
+    } catch (e) {
       setStatus({ kind: "unreachable" });
+      throw e;
     }
   }
 
