@@ -1,6 +1,8 @@
+mod hantei;
 mod ollama;
 mod store;
 
+use hantei::hantei_bun;
 use ollama::{load_settings, ollama_status, save_settings};
 use store::{delete_genbun, list_genbun, load_genbun, save_genbun, Store};
 use tauri::Manager;
@@ -24,7 +26,8 @@ pub fn run() {
             delete_genbun,
             ollama_status,
             load_settings,
-            save_settings
+            save_settings,
+            hantei_bun
         ])
         .run(tauri::generate_context!())
         .expect("error while running tauri application");

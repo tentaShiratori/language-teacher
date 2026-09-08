@@ -5,19 +5,20 @@ import { GenbunPaste } from "./_lib/GenbunPaste";
 import { OllamaSetup } from "./_lib/OllamaSetup";
 import { Settings } from "./_lib/Settings";
 import { useGenbun } from "./_lib/useGenbun";
+import { useHantei } from "./_lib/useHantei";
 import { useOllama } from "./_lib/useOllama";
 import "./App.css";
 
 function App() {
   const {
     session,
+    setSession,
+    persist,
     phase,
     ichiran,
     onPaste,
     onSelectGengo,
     onSelectBun,
-    onTab,
-    onCtrlEnter,
     onChangeYakubun,
     onMerge,
     onResplit,
@@ -26,6 +27,14 @@ function App() {
     onBackToIchiran,
   } = useGenbun();
   const { ready, status, settings, canHantei, onSaveSettings, onRecheck } = useOllama();
+  const { onTab, onCtrlEnter, onHantei, isPending, errorOf } = useHantei({
+    session,
+    canHantei,
+    setSession,
+    persist,
+  });
+
+  const selectedIndex = session?.selectedIndex ?? 0;
 
   return (
     <main className="app">
@@ -54,11 +63,13 @@ function App() {
             buns={session.buns}
             selectedIndex={session.selectedIndex}
             canHantei={canHantei}
+            pending={isPending(selectedIndex)}
+            error={errorOf(selectedIndex)}
             onSelect={onSelectBun}
             onChangeYakubun={onChangeYakubun}
             onTab={onTab}
             onCtrlEnter={onCtrlEnter}
-            onHantei={onCtrlEnter}
+            onHantei={onHantei}
             onMerge={onMerge}
             onResplit={onResplit}
           />
