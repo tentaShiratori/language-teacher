@@ -10,23 +10,23 @@ export function useOllama() {
   useEffect(() => {
     let alive = true;
     void (async () => {
-      try {
-        const [nextSettings, nextStatus] = await Promise.all([loadSettings(), fetchOllamaStatus()]);
-        if (!alive) {
-          return;
-        }
-        setSettings(nextSettings);
-        setStatus(nextStatus);
-      } catch {
-        if (!alive) {
-          return;
-        }
-        setStatus({ kind: "unreachable" });
-      } finally {
-        if (alive) {
-          setReady(true);
-        }
+      // 設定読込の失敗で検知結果を潰さない（起動時の Ollama 判定を独立させる）
+      const [settingsResult, statusResult] = await Promise.allSettled([
+        loadSettings(),
+        fetchOllamaStatus(),
+      ]);
+      if (!alive) {
+        return;
       }
+      if (settingsResult.status === "fulfilled") {
+        setSettings(settingsResult.value);
+      }
+      if (statusResult.status === "fulfilled") {
+        setStatus(statusResult.value);
+      } else {
+        setStatus({ kind: "unreachable" });
+      }
+      setReady(true);
     })();
     return () => {
       alive = false;
