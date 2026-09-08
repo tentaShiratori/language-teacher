@@ -1,10 +1,6 @@
-export type Hantei = {
-  tekisetsu: boolean;
-  imi: boolean;
-  bunpo: boolean;
-  shiteki: string | null;
-  hinto: string | null;
-};
+import type { Hantei } from "../bindings/Hantei";
+
+export type { Hantei } from "../bindings/Hantei";
 
 /** 訳文が空なら LLM を呼ばない。 */
 function shouldCallHantei(yakubun: string): boolean {

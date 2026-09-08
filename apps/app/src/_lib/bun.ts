@@ -1,12 +1,7 @@
-export type Bun = {
-  body: string;
-  yakubun: string;
-  tekisetsu: boolean | null;
-  imi: boolean | null;
-  bunpo: boolean | null;
-  shiteki: string | null;
-  hinto: string | null;
-};
+import type { BunRecord } from "../bindings/BunRecord";
+
+/** IPC の `BunRecord` と同じ形。文編集の純関数ではこの名前を使う。 */
+export type Bun = BunRecord;
 
 const KUKEN = new Set(["。", "！", "？", "．"]);
 

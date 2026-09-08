@@ -1,9 +1,11 @@
 use crate::store::{Settings, Store};
 use serde::{Deserialize, Serialize};
 use tauri::State;
+use ts_rs::TS;
 
-#[derive(Debug, Clone, Serialize, Deserialize, PartialEq, Eq)]
+#[derive(Debug, Clone, Serialize, Deserialize, PartialEq, Eq, TS)]
 #[serde(rename_all = "camelCase", tag = "kind")]
+#[ts(export)]
 pub enum OllamaStatus {
     Ok,
     Unreachable,
