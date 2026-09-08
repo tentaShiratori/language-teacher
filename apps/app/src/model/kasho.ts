@@ -1,16 +1,14 @@
-/** 不適切時に訳文上で示す位置。文字は Unicode スカラー値の 0 始まり。 */
-export type Kasho =
-  | { shurui: "ketsujo"; index: number }
-  | { shurui: "ayamari"; start: number; end: number };
+/** 不適切時に訳文上で示す誤りの範囲。文字は Unicode スカラー値の 0 始まり、半開区間 [start, end)。 */
+export type Kasho = { shurui: "ayamari"; start: number; end: number };
 
-/** 表示用の一列。欠けは文字の間（または両端）に挟む。 */
-export type KashoCol = { shurui: "moji"; moji: string; ayamari: boolean } | { shurui: "ketsujo" };
+/** 波線付き／なしの連続した断片。 */
+export type KashoSegment = { text: string; ayamari: boolean };
 
 function yakubunCharCount(yakubun: string): number {
   return [...yakubun].length;
 }
 
-/** 範囲外・逆転・未知形を捨てる。適切なら空にする。 */
+/** 範囲外・逆転・ayamari 以外を捨てる。適切なら空にする。 */
 export function normalizeKasho(
   yakubun: string,
   kasho: readonly Kasho[] | null | undefined,
@@ -25,52 +23,44 @@ export function normalizeKasho(
     if (item == null || typeof item !== "object") {
       continue;
     }
-    if (item.shurui === "ketsujo") {
-      if (Number.isInteger(item.index) && item.index >= 0 && item.index <= len) {
-        out.push({ shurui: "ketsujo", index: item.index });
-      }
+    if (item.shurui !== "ayamari") {
       continue;
     }
-    if (item.shurui === "ayamari") {
-      if (
-        Number.isInteger(item.start) &&
-        Number.isInteger(item.end) &&
-        item.start >= 0 &&
-        item.start < item.end &&
-        item.end <= len
-      ) {
-        out.push({ shurui: "ayamari", start: item.start, end: item.end });
-      }
+    if (
+      Number.isInteger(item.start) &&
+      Number.isInteger(item.end) &&
+      item.start >= 0 &&
+      item.start < item.end &&
+      item.end <= len
+    ) {
+      out.push({ shurui: "ayamari", start: item.start, end: item.end });
     }
   }
   return out;
 }
 
-/** 訳文と箇所から、文字列と欠けの `^` 用の列を作る。 */
-export function buildKashoCols(yakubun: string, kasho: readonly Kasho[]): KashoCol[] {
+/** 訳文と箇所から、波線を付ける連続断片を作る。 */
+export function buildKashoSegments(yakubun: string, kasho: readonly Kasho[]): KashoSegment[] {
   const chars = [...yakubun];
+  if (chars.length === 0) {
+    return [];
+  }
   const cover = chars.map(() => false);
-  const ketsujoAt = new Set<number>();
-
   for (const item of kasho) {
-    if (item.shurui === "ketsujo") {
-      ketsujoAt.add(item.index);
-      continue;
-    }
     for (let i = item.start; i < item.end; i++) {
       cover[i] = true;
     }
   }
 
-  const cols: KashoCol[] = [];
-  for (let i = 0; i < chars.length; i++) {
-    if (ketsujoAt.has(i)) {
-      cols.push({ shurui: "ketsujo" });
+  const segments: KashoSegment[] = [];
+  for (let i = 0; i < chars.length;) {
+    const ayamari = cover[i]!;
+    let j = i + 1;
+    while (j < chars.length && cover[j] === ayamari) {
+      j += 1;
     }
-    cols.push({ shurui: "moji", moji: chars[i]!, ayamari: cover[i]! });
+    segments.push({ text: chars.slice(i, j).join(""), ayamari });
+    i = j;
   }
-  if (ketsujoAt.has(chars.length)) {
-    cols.push({ shurui: "ketsujo" });
-  }
-  return cols;
+  return segments;
 }

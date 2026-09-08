@@ -500,18 +500,12 @@ mod tests {
         record.buns[0].imi = Some(true);
         record.buns[0].bunpo = Some(false);
         record.buns[0].hinto = Some("前置詞がありません".to_string());
-        record.buns[0].kasho = vec![
-            Kasho::Ketsujo { index: 5 },
-            Kasho::Ayamari { start: 0, end: 1 },
-        ];
+        record.buns[0].kasho = vec![Kasho::Ayamari { start: 0, end: 1 }];
         store.save_genbun(record).unwrap();
         let loaded = store.load_genbun("g-kasho").unwrap().expect("exists");
         assert_eq!(
             loaded.buns[0].kasho,
-            vec![
-                Kasho::Ketsujo { index: 5 },
-                Kasho::Ayamari { start: 0, end: 1 },
-            ]
+            vec![Kasho::Ayamari { start: 0, end: 1 }]
         );
     }
 

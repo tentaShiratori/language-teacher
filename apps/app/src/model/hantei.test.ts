@@ -87,7 +87,7 @@ describe("runHanteiIfNeeded", () => {
   });
 
   test("適切なら hinto と kasho を捨てる", async () => {
-    const kasho: Kasho[] = [{ shurui: "ketsujo", index: 0 }];
+    const kasho: Kasho[] = [{ shurui: "ayamari", start: 0, end: 1 }];
     await expect(
       runHanteiIfNeeded("Hi", async () =>
         raw({
@@ -110,10 +110,7 @@ describe("runHanteiIfNeeded", () => {
   });
 
   test("不適切なら訳文内の箇所を残す", async () => {
-    const kasho: Kasho[] = [
-      { shurui: "ketsujo", index: 2 },
-      { shurui: "ayamari", start: 0, end: 2 },
-    ];
+    const kasho: Kasho[] = [{ shurui: "ayamari", start: 0, end: 2 }];
     await expect(
       runHanteiIfNeeded("Hi", async () =>
         raw({
@@ -142,7 +139,7 @@ describe("runHanteiIfNeeded", () => {
           imi: false,
           bunpo: false,
           hinto: "違う",
-          kasho: [{ shurui: "ketsujo", index: 99 }],
+          kasho: [{ shurui: "ayamari", start: 0, end: 99 }],
         }),
       ),
     ).resolves.toEqual({
