@@ -4,14 +4,9 @@ import { HanteiLogMado } from "./HanteiLogMado";
 import * as store from "./store";
 import type { HanteiLogLine } from "./store";
 
-vi.mock("./store", async (importOriginal) => {
-  const actual = await importOriginal<typeof import("./store")>();
-  return {
-    ...actual,
-    listHanteiLog: vi.fn<() => Promise<HanteiLogLine[]>>(),
-    logJsError: vi.fn<() => Promise<void>>(async () => undefined),
-  };
-});
+vi.mock("./store", () => ({
+  listHanteiLog: vi.fn<() => Promise<HanteiLogLine[]>>(),
+}));
 
 vi.mock("./error_log", () => ({
   logCaughtError: vi.fn(),
