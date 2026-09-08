@@ -1,4 +1,4 @@
-import type { Bun } from "./bun";
+import type { Bun } from "../../model/bun";
 
 export function HanteiView({
   bun,

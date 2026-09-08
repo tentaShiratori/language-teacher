@@ -1,5 +1,5 @@
 import { describe, expect, test } from "vitest";
-import { fromRecord, startGenbun, toRecord, type GenbunSession } from "./genbun";
+import { fromRecord, startGenbun, toRecord, type GenbunSession } from "../model/genbun";
 import { isGakushuGengo, type GenbunRecord } from "./store";
 
 function savedSession(): GenbunSession {

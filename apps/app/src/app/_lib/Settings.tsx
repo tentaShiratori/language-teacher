@@ -1,6 +1,6 @@
 import { useState, type FormEvent } from "react";
-import { isOllamaModel, OLLAMA_MODELS, type Settings as SettingsValue } from "./ollama";
-import { openHanteiLogMado } from "./openHanteiLogMado";
+import { isOllamaModel, OLLAMA_MODELS, type Settings as SettingsValue } from "../../lib/ollama";
+import { openHanteiLogMado } from "../../lib/openHanteiLogMado";
 
 export function Settings({
   value,

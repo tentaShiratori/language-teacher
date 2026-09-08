@@ -1,11 +1,11 @@
 import { afterEach, describe, expect, test, vi } from "vitest";
 import { act, renderHook, waitFor } from "@testing-library/react";
-import { applyHantei, type GenbunSession } from "./genbun";
-import type { Hantei } from "./hantei";
-import * as store from "./store";
+import { applyHantei, type GenbunSession } from "../../model/genbun";
+import type { Hantei } from "../../model/hantei";
+import * as store from "../../lib/store";
 import { useHantei } from "./useHantei";
 
-vi.mock("./store", () => ({
+vi.mock("../../lib/store", () => ({
   hanteiBun: vi.fn<() => Promise<Hantei>>(),
   logJsError: vi.fn<() => Promise<void>>(async () => undefined),
 }));

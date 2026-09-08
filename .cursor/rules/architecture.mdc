@@ -14,7 +14,7 @@ alwaysApply: true
 
 予約ファイルは `page` / `layout` / `loading` / `error` / `not-found` / `route` / `template` / `default` / `global-error` と、icon などのメタデータファイル。`_` 始まりはルーティングに出ない。
 
-`apps/app` は既存ファイルの隣。domain / types 層や `features/` は、その配置が既にあるときだけ使う。層を先に新設しない。
+`apps/app`（Tauri + React + Vite）は入口 `src/main.tsx` のみ。画面は `src/app/` 以下にルート単位（本編 `App.tsx`、判定ログ `hantei-log/HanteiLogMado.tsx`）。全体共有は `src/lib/`、ドメインは `src/model/`、画面専用は各画面の `_lib/`。`bindings/` は ts-rs 生成物で据え置き。テスト本体は対象の隣。`test/` はテスト専用ヘルパー用（無いときは作らない）。`features/` は新設しない。
 
 # api の internal
 
@@ -75,9 +75,9 @@ usecase の `app.go` に書く口を置く。query は読む口だけを見る�
 
 | 対象 | ファイル名 | 例 |
 | --- | --- | --- |
-| コンポーネント | `Xxx.tsx` | `app/_lib/Ledger.tsx` |
+| コンポーネント | `Xxx.tsx` | `app/_lib/Ledger.tsx` / `app/App.tsx` |
 | カスタムフック | `useXxx.ts`（JSX なら `.tsx`） | `app/_lib/useNyushukkin.ts` |
-| 純関数・型 | `xxx.ts` | `app/_lib/nyushukkin.ts` |
+| 純関数・型 | `xxx.ts` | `model/nyushukkin.ts` / `lib/store.ts` |
 | テスト | 対象の隣に `*.test.ts` / `*.test.tsx` | `app/_lib/Ledger.test.tsx` |
 | Next.js の予約名 | フレームワークどおり小文字 | `page.tsx`, `layout.tsx` |
 | Go（cmd） | 小文字。テストは `_test.go` | `main.go` |

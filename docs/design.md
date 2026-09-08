@@ -28,7 +28,7 @@
 
 ## 配置
 
-`apps/app` に Tauri + React + Vite を置く。`features/` や domain 層は新設しない。画面用のコンポーネント・フック・純関数・テストは `src/_lib/`。入口だけ `src/` 直下。
+`apps/app` に Tauri + React + Vite を置く。入口は `src/main.tsx` のみ。画面は `app/` 以下にルート単位。共有は `lib/`、ドメインは `model/`。画面専用は各画面の `_lib/`。テスト本体は対象の隣。`test/` はテスト専用ヘルパー用（無いときは作らない）。`features/` は新設しない。
 
 名前は CONTEXT のローマ字。ケバブケースにしない。
 
@@ -39,33 +39,47 @@ apps/app/
   vite.config.ts
   src/
     main.tsx
-    App.tsx
-    globals.css
+    vite-env.d.ts
     bindings/          # ts-rs 生成物（手編集しない。コミットする）
-    _lib/
-      GenbunPaste.tsx
-      GakushuGengoSelect.tsx
-      BunList.tsx
-      YakubunField.tsx
-      HanteiView.tsx
-      OllamaSetup.tsx
-      GenbunIndex.tsx
-      Settings.tsx
-      HanteiLogHyoji.tsx
-      HanteiLogMado.tsx
+    lib/               # 全体で使うコード（IPC・ルート・共有スタイル等）
+      app.css
       appRoutes.tsx
+      store.ts         # invoke 包み。型は bindings を再 export
+      error_log.ts     # 未捕捉・握りつぶし → log_js_error
+      ollama.ts
       openHanteiLogMado.ts
-      useGenbun.ts
-      useHantei.ts
-      useHanteiLog.ts
-      useOllama.ts
-      bun.ts
-      hantei.ts
-      gakushu_gengo.ts
-      error_log.ts      # 未捕捉・握りつぶし → log_js_error
-      store.ts          # invoke 包み。型は bindings を再 export
       *.test.ts
       *.test.tsx
+    model/             # ドメインモデル・ドメインロジック
+      bun.ts
+      genbun.ts
+      hantei.ts
+      gakushu_gengo.ts
+      *.test.ts
+    app/
+      App.tsx          # 本編（/）
+      App.test.ts
+      _lib/            # App.tsx 用
+        GenbunPaste.tsx
+        GakushuGengoSelect.tsx
+        BunList.tsx
+        YakubunField.tsx
+        HanteiView.tsx
+        OllamaSetup.tsx
+        GenbunIndex.tsx
+        Settings.tsx
+        useGenbun.ts
+        useHantei.ts
+        useOllama.ts
+        *.test.ts
+        *.test.tsx
+      hantei-log/
+        HanteiLogMado.tsx   # 判定ログ窓（/hantei-log）
+        HanteiLogMado.test.tsx
+        _lib/
+          HanteiLogHyoji.tsx
+          useHanteiLog.ts
+          *.test.tsx
   src-tauri/
     tauri.conf.json
     Cargo.toml

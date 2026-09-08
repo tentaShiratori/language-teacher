@@ -1,7 +1,7 @@
 import { render, screen } from "@testing-library/react";
 import { describe, expect, test } from "vitest";
 import { HanteiLogHyoji } from "./HanteiLogHyoji";
-import type { HanteiLogLine } from "./store";
+import type { HanteiLogLine } from "../../../lib/store";
 
 function baseLine(overrides: Partial<HanteiLogLine> = {}): HanteiLogLine {
   return {

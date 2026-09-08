@@ -1,5 +1,5 @@
-import { HanteiLogHyoji } from "./HanteiLogHyoji";
-import { useHanteiLog } from "./useHanteiLog";
+import { HanteiLogHyoji } from "./_lib/HanteiLogHyoji";
+import { useHanteiLog } from "./_lib/useHanteiLog";
 
 export function HanteiLogMado() {
   const { items, status } = useHanteiLog();
