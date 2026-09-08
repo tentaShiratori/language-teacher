@@ -1,5 +1,6 @@
 import { describe, expect, test } from "vitest";
 import {
+  applyHantei,
   mergeSelected,
   phaseOf,
   resplitSelected,
@@ -11,41 +12,25 @@ import {
   type GenbunSession,
 } from "./genbun";
 
+function emptyBun(body: string) {
+  return {
+    body,
+    yakubun: "",
+    tekisetsu: null as boolean | null,
+    imi: null as boolean | null,
+    bunpo: null as boolean | null,
+    shiteki: null as string | null,
+    hinto: null as string | null,
+  };
+}
+
 function henshuSession(overrides: Partial<GenbunSession> = {}): GenbunSession {
   return {
     id: "session-1",
     body: "あ。い。う。",
     gakushuGengo: "en",
     createdAt: "2026-09-08T00:00:00.000Z",
-    buns: [
-      {
-        body: "あ。",
-        yakubun: "",
-        tekisetsu: null,
-        imi: null,
-        bunpo: null,
-        shiteki: null,
-        hinto: null,
-      },
-      {
-        body: "い。",
-        yakubun: "",
-        tekisetsu: null,
-        imi: null,
-        bunpo: null,
-        shiteki: null,
-        hinto: null,
-      },
-      {
-        body: "う。",
-        yakubun: "",
-        tekisetsu: null,
-        imi: null,
-        bunpo: null,
-        shiteki: null,
-        hinto: null,
-      },
-    ],
+    buns: [emptyBun("あ。"), emptyBun("い。"), emptyBun("う。")],
     selectedIndex: 0,
     ...overrides,
   };
@@ -143,17 +128,7 @@ describe("mergeSelected / resplitSelected", () => {
 
   test("キャレット位置で再分割する", () => {
     const session = henshuSession({
-      buns: [
-        {
-          body: "あいう",
-          yakubun: "x",
-          tekisetsu: true,
-          imi: true,
-          bunpo: true,
-          shiteki: null,
-          hinto: null,
-        },
-      ],
+      buns: [{ ...emptyBun("あいう"), yakubun: "x", tekisetsu: true, imi: true, bunpo: true }],
       selectedIndex: 0,
     });
     const next = resplitSelected(session, 1);
@@ -164,5 +139,23 @@ describe("mergeSelected / resplitSelected", () => {
   test("キャレット先頭では再分割しない", () => {
     const session = henshuSession();
     expect(resplitSelected(session, 0).buns).toEqual(session.buns);
+  });
+});
+
+describe("applyHantei", () => {
+  const ok = { tekisetsu: true, imi: true, bunpo: true, shiteki: "指摘", hinto: null };
+  const ng = { tekisetsu: false, imi: false, bunpo: true, shiteki: null, hinto: "旧" };
+
+  test("指定した文の判定を上書きする", () => {
+    const second = applyHantei(applyHantei(henshuSession(), 0, ng), 0, ok);
+    expect(second.buns[0]?.tekisetsu).toBe(true);
+    expect(second.buns[0]?.shiteki).toBe("指摘");
+    expect(second.buns[0]?.hinto).toBeNull();
+    expect(second.buns[1]?.tekisetsu).toBeNull();
+  });
+
+  test("範囲外は変えない", () => {
+    const session = henshuSession();
+    expect(applyHantei(session, 9, ok)).toEqual(session);
   });
 });

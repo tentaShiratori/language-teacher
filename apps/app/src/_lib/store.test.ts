@@ -60,16 +60,19 @@ describe("toRecord / fromRecord", () => {
         {
           body: "あ。",
           yakubun: "Ah.",
-          tekisetsu: null,
-          imi: null,
-          bunpo: null,
-          shiteki: null,
+          tekisetsu: true,
+          imi: true,
+          bunpo: true,
+          shiteki: "指摘",
           hinto: null,
         },
       ],
     };
-    expect(fromRecord(record)?.gakushuGengo).toBe("de");
-    expect(fromRecord(record)?.selectedIndex).toBe(0);
+    const session = fromRecord(record);
+    expect(session?.gakushuGengo).toBe("de");
+    expect(session?.selectedIndex).toBe(0);
+    expect(session?.buns[0]?.tekisetsu).toBe(true);
+    expect(session?.buns[0]?.shiteki).toBe("指摘");
   });
 
   test("未知の学習言語は拒否する", () => {

@@ -34,8 +34,6 @@ function App() {
     persist,
   });
 
-  const selectedIndex = session?.selectedIndex ?? 0;
-
   return (
     <main className="app">
       <h1>言語教師</h1>
@@ -63,8 +61,8 @@ function App() {
             buns={session.buns}
             selectedIndex={session.selectedIndex}
             canHantei={canHantei}
-            pending={isPending(selectedIndex)}
-            error={errorOf(selectedIndex)}
+            isPending={isPending}
+            errorOf={errorOf}
             onSelect={onSelectBun}
             onChangeYakubun={onChangeYakubun}
             onTab={onTab}

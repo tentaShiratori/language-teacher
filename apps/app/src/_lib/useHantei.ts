@@ -46,7 +46,7 @@ export function useHantei({
       return;
     }
     const target = snapshot.buns[index];
-    if (target === undefined) {
+    if (target === undefined || target.yakubun === "") {
       return;
     }
 
