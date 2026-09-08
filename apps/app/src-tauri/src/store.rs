@@ -35,6 +35,25 @@ pub struct GenbunSummary {
     pub created_at: String,
 }
 
+pub const DEFAULT_OLLAMA_BASE_URL: &str = "http://127.0.0.1:11434";
+pub const DEFAULT_OLLAMA_MODEL: &str = "qwen3:8b";
+
+#[derive(Debug, Clone, Serialize, Deserialize, PartialEq, Eq)]
+#[serde(rename_all = "camelCase")]
+pub struct Settings {
+    pub ollama_base_url: String,
+    pub ollama_model: String,
+}
+
+impl Default for Settings {
+    fn default() -> Self {
+        Self {
+            ollama_base_url: DEFAULT_OLLAMA_BASE_URL.to_string(),
+            ollama_model: DEFAULT_OLLAMA_MODEL.to_string(),
+        }
+    }
+}
+
 pub struct Store {
     conn: Mutex<Connection>,
 }
@@ -251,6 +270,47 @@ impl Store {
             .map_err(|e| e.to_string())?;
         Ok(())
     }
+
+    pub fn load_settings(&self) -> Result<Settings, String> {
+        let conn = self.conn.lock().map_err(|e| e.to_string())?;
+        conn.query_row(
+            r#"
+            SELECT ollama_base_url, ollama_model
+            FROM settings
+            WHERE id = 1
+            "#,
+            [],
+            |row| {
+                Ok(Settings {
+                    ollama_base_url: row.get(0)?,
+                    ollama_model: row.get(1)?,
+                })
+            },
+        )
+        .map_err(|e| e.to_string())
+    }
+
+    pub fn save_settings(&self, settings: Settings) -> Result<(), String> {
+        let base_url = settings.ollama_base_url.trim();
+        let model = settings.ollama_model.trim();
+        if base_url.is_empty() {
+            return Err("ollama_base_url is empty".to_string());
+        }
+        if model.is_empty() {
+            return Err("ollama_model is empty".to_string());
+        }
+        let conn = self.conn.lock().map_err(|e| e.to_string())?;
+        conn.execute(
+            r#"
+            UPDATE settings
+            SET ollama_base_url = ?1, ollama_model = ?2
+            WHERE id = 1
+            "#,
+            params![base_url, model],
+        )
+        .map_err(|e| e.to_string())?;
+        Ok(())
+    }
 }
 
 fn first_line(body: &str) -> String {
@@ -393,5 +453,44 @@ mod tests {
     fn load_missing_is_none() {
         let store = temp_store();
         assert!(store.load_genbun("missing").unwrap().is_none());
+    }
+
+    #[test]
+    fn settings_defaults() {
+        let store = temp_store();
+        let settings = store.load_settings().unwrap();
+        assert_eq!(settings.ollama_base_url, DEFAULT_OLLAMA_BASE_URL);
+        assert_eq!(settings.ollama_model, DEFAULT_OLLAMA_MODEL);
+    }
+
+    #[test]
+    fn save_settings_roundtrip() {
+        let store = temp_store();
+        store
+            .save_settings(Settings {
+                ollama_base_url: "http://127.0.0.1:11435".to_string(),
+                ollama_model: "qwen3:14b".to_string(),
+            })
+            .unwrap();
+        let settings = store.load_settings().unwrap();
+        assert_eq!(settings.ollama_base_url, "http://127.0.0.1:11435");
+        assert_eq!(settings.ollama_model, "qwen3:14b");
+    }
+
+    #[test]
+    fn save_settings_rejects_empty() {
+        let store = temp_store();
+        assert!(store
+            .save_settings(Settings {
+                ollama_base_url: "   ".to_string(),
+                ollama_model: "qwen3:8b".to_string(),
+            })
+            .is_err());
+        assert!(store
+            .save_settings(Settings {
+                ollama_base_url: DEFAULT_OLLAMA_BASE_URL.to_string(),
+                ollama_model: "".to_string(),
+            })
+            .is_err());
     }
 }

@@ -1,6 +1,7 @@
 import { invoke } from "@tauri-apps/api/core";
 import type { Bun } from "./bun";
 import type { GakushuGengo } from "./gakushu_gengo";
+import type { OllamaStatus, Settings } from "./ollama";
 
 export type GenbunRecord = {
   id: string;
@@ -35,4 +36,16 @@ export async function loadGenbun(id: string): Promise<GenbunRecord | null> {
 
 export async function deleteGenbun(id: string): Promise<void> {
   await invoke("delete_genbun", { id });
+}
+
+export async function fetchOllamaStatus(): Promise<OllamaStatus> {
+  return invoke<OllamaStatus>("ollama_status");
+}
+
+export async function loadSettings(): Promise<Settings> {
+  return invoke<Settings>("load_settings");
+}
+
+export async function saveSettings(settings: Settings): Promise<OllamaStatus> {
+  return invoke<OllamaStatus>("save_settings", { settings });
 }

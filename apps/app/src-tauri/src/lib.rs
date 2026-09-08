@@ -1,5 +1,7 @@
+mod ollama;
 mod store;
 
+use ollama::{load_settings, ollama_status, save_settings};
 use store::{delete_genbun, list_genbun, load_genbun, save_genbun, Store};
 use tauri::Manager;
 
@@ -19,7 +21,10 @@ pub fn run() {
             save_genbun,
             list_genbun,
             load_genbun,
-            delete_genbun
+            delete_genbun,
+            ollama_status,
+            load_settings,
+            save_settings
         ])
         .run(tauri::generate_context!())
         .expect("error while running tauri application");

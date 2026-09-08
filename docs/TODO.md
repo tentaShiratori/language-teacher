@@ -46,13 +46,13 @@
 
 ## 4. Ollama 検知と設定
 
-- [ ] `ollama.rs` — `GET /api/tags`。届かない／モデル無しを分ける
-- [ ] `ollama_status`、`load_settings` / `save_settings`
-- [ ] 既定 URL `http://127.0.0.1:11434`、既定モデル `qwen3:8b`、選択肢に `qwen3:14b`
-- [ ] 起動時と設定保存後に検知
-- [ ] `OllamaSetup` — [ollama.md](./ollama.md) と同じ手順を、失敗理由ごとに出す。判定ボタンと Tab 判定を無効化
-- [ ] `Settings`
-- [ ] `useOllama.ts` のテストは、Rust をモックできる境界（フロントの分岐）だけ。HTTP 本体は Rust 側のテストまたは手動
+- [x] `ollama.rs` — `GET /api/tags`。届かない／モデル無しを分ける
+- [x] `ollama_status`、`load_settings` / `save_settings`
+- [x] 既定 URL `http://127.0.0.1:11434`、既定モデル `qwen3:8b`、選択肢に `qwen3:14b`
+- [x] 起動時と設定保存後に検知
+- [x] `OllamaSetup` — [ollama.md](./ollama.md) と同じ手順を、失敗理由ごとに出す。判定ボタンと Tab 判定を無効化
+- [x] `Settings`
+- [x] `useOllama.ts` のテストは、Rust をモックできる境界（フロントの分岐）だけ。HTTP 本体は Rust 側のテストまたは手動
 
 完了: Ollama を止めると起動直後に手順が出て判定できない。起動して `qwen3:8b` を入れると消える。
 
