@@ -107,8 +107,7 @@ pub fn list_lines(path: &Path) -> Result<Vec<HanteiLogLine>, String> {
         if trimmed.is_empty() {
             continue;
         }
-        let parsed: HanteiLogLine =
-            serde_json::from_str(trimmed).map_err(|e| e.to_string())?;
+        let parsed: HanteiLogLine = serde_json::from_str(trimmed).map_err(|e| e.to_string())?;
         lines.push(parsed);
     }
     lines.reverse();
@@ -290,7 +289,7 @@ mod tests {
         let lines = list_lines(&path).unwrap();
         assert_eq!(lines.len(), 2);
         assert_eq!(lines[0].at, "2026-09-08T00:00:01.000Z");
-        assert_eq!(lines[0].hantei.as_ref().unwrap().tekisetsu, true);
+        assert!(lines[0].hantei.as_ref().unwrap().tekisetsu);
         assert_eq!(lines[1].error.as_deref(), Some("古い失敗"));
         let _ = fs::remove_file(&path);
     }
