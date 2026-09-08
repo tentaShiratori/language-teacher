@@ -141,10 +141,7 @@ pub fn build_user_prompt(
 }
 
 pub fn chat_completions_url(base_url: &str) -> String {
-    format!(
-        "{}/v1/chat/completions",
-        base_url.trim_end_matches('/')
-    )
+    format!("{}/v1/chat/completions", base_url.trim_end_matches('/'))
 }
 
 fn strip_think_tags(content: &str) -> String {
@@ -212,25 +209,11 @@ pub fn request_hantei(
         match fetch_chat_content(&url, &body) {
             Ok(content) => match parse_hantei_content(&content) {
                 Ok(hantei) => {
-                    log_attempt(
-                        log_path,
-                        model,
-                        &system,
-                        &user,
-                        Some(&content),
-                        Ok(&hantei),
-                    );
+                    log_attempt(log_path, model, &system, &user, Some(&content), Ok(&hantei));
                     return Ok(hantei);
                 }
                 Err(err) => {
-                    log_attempt(
-                        log_path,
-                        model,
-                        &system,
-                        &user,
-                        Some(&content),
-                        Err(&err),
-                    );
+                    log_attempt(log_path, model, &system, &user, Some(&content), Err(&err));
                     last_err = err;
                 }
             },
