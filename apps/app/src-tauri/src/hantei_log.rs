@@ -1,14 +1,15 @@
 use crate::hantei::Hantei;
-use serde::Serialize;
+use serde::{Deserialize, Serialize};
 use std::fs::OpenOptions;
 use std::io::Write;
 use std::path::{Path, PathBuf};
 use std::time::{SystemTime, UNIX_EPOCH};
+use tauri::State;
 
 #[derive(Debug, Clone)]
 pub struct HanteiLogPath(pub PathBuf);
 
-#[derive(Debug, Clone, Serialize, PartialEq, Eq)]
+#[derive(Debug, Clone, Serialize, Deserialize, PartialEq, Eq)]
 #[serde(rename_all = "camelCase")]
 pub struct HanteiLogLine {
     pub at: String,
@@ -16,9 +17,9 @@ pub struct HanteiLogLine {
     pub system_prompt: String,
     pub user_prompt: String,
     pub message_content: Option<String>,
-    #[serde(skip_serializing_if = "Option::is_none")]
+    #[serde(default, skip_serializing_if = "Option::is_none")]
     pub hantei: Option<Hantei>,
-    #[serde(skip_serializing_if = "Option::is_none")]
+    #[serde(default, skip_serializing_if = "Option::is_none")]
     pub error: Option<String>,
 }
 
@@ -92,6 +93,31 @@ pub fn write_attempt(
         error: outcome.err().map(str::to_string),
     };
     append_hantei_log(path, &line)
+}
+
+/// ログファイルを読み、新しい行を先にする。無い・空なら空配列。
+pub fn list_lines(path: &Path) -> Result<Vec<HanteiLogLine>, String> {
+    if !path.exists() {
+        return Ok(Vec::new());
+    }
+    let body = std::fs::read_to_string(path).map_err(|e| e.to_string())?;
+    let mut lines = Vec::new();
+    for line in body.lines() {
+        let trimmed = line.trim();
+        if trimmed.is_empty() {
+            continue;
+        }
+        let parsed: HanteiLogLine =
+            serde_json::from_str(trimmed).map_err(|e| e.to_string())?;
+        lines.push(parsed);
+    }
+    lines.reverse();
+    Ok(lines)
+}
+
+#[tauri::command]
+pub fn list_hantei_log(log_path: State<'_, HanteiLogPath>) -> Result<Vec<HanteiLogLine>, String> {
+    list_lines(&log_path.0)
 }
 
 #[cfg(test)]
@@ -234,5 +260,46 @@ mod tests {
             hantei_log_path(&dir),
             PathBuf::from("/tmp/app-data/hantei.jsonl")
         );
+    }
+
+    #[test]
+    fn list_lines_returns_newest_first() {
+        let path = temp_log_path("list");
+        let hantei = sample_hantei();
+        write_attempt(
+            &path,
+            "2026-09-08T00:00:00.000Z".into(),
+            "qwen3:8b",
+            "s1",
+            "u1",
+            Some("old"),
+            Err("古い失敗"),
+        )
+        .unwrap();
+        write_attempt(
+            &path,
+            "2026-09-08T00:00:01.000Z".into(),
+            "qwen3:8b",
+            "s2",
+            "u2",
+            Some(r#"{"tekisetsu":true,"imi":true,"bunpo":true,"shiteki":null,"hinto":null}"#),
+            Ok(&hantei),
+        )
+        .unwrap();
+
+        let lines = list_lines(&path).unwrap();
+        assert_eq!(lines.len(), 2);
+        assert_eq!(lines[0].at, "2026-09-08T00:00:01.000Z");
+        assert_eq!(lines[0].hantei.as_ref().unwrap().tekisetsu, true);
+        assert_eq!(lines[1].error.as_deref(), Some("古い失敗"));
+        let _ = fs::remove_file(&path);
+    }
+
+    #[test]
+    fn list_lines_missing_file_is_empty() {
+        let path = temp_log_path("missing");
+        let _ = fs::remove_file(&path);
+        let lines = list_lines(&path).unwrap();
+        assert!(lines.is_empty());
     }
 }
