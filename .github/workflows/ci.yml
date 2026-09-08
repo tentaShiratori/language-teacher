@@ -88,22 +88,6 @@ jobs:
           cache: true
           install_args: rust
 
-      # Runner に入っている別 toolchain（例: 1.98.0 vs 1.98.1）が
-      # rust-cache の環境ハッシュを変え、main と PR でキーが割れるのを防ぐ。
-      - name: Use only mise rust toolchain
-        run: |
-          rust_version="$(mise current rust)"
-          echo "RUST_VERSION=$rust_version" >> "$GITHUB_ENV"
-          rustup default "$rust_version"
-          rustup toolchain list | while read -r line; do
-            tc="${line%% *}"
-            case "$tc" in
-              "${rust_version}"*) ;;
-              *) rustup toolchain uninstall "$tc" || true ;;
-            esac
-          done
-          rustup show
-
       - name: Cache apt packages
         uses: actions/cache@v6
         with:
@@ -136,8 +120,8 @@ jobs:
         with:
           workspaces: apps/app/src-tauri
           shared-key: tauri
-        env:
-          RUSTUP_TOOLCHAIN: ${{ env.RUST_VERSION }}
+          add-job-id-key: "false"
+          add-rust-environment-hash-key: "false"
 
       - run: cargo fmt --check
       - run: cargo clippy --all-targets -- -D warnings
