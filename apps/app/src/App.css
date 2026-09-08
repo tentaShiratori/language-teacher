@@ -199,6 +199,14 @@ button:disabled {
   font-weight: 400;
 }
 
+.bun-hantei-status {
+  display: block;
+  margin-top: 0.2rem;
+  font-size: 0.8rem;
+  color: #555;
+  font-weight: 500;
+}
+
 .bun-henshu {
   display: flex;
   flex-direction: column;

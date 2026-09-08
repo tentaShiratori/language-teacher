@@ -3,12 +3,25 @@ import type { Bun } from "./bun";
 import { HanteiView } from "./HanteiView";
 import { YakubunField } from "./YakubunField";
 
+function bunStatusLabel(bun: Bun, pending: boolean): string | null {
+  if (pending) {
+    return "判定中";
+  }
+  if (bun.tekisetsu === true) {
+    return "適切";
+  }
+  if (bun.tekisetsu === false) {
+    return "不適切";
+  }
+  return null;
+}
+
 export function BunList({
   buns,
   selectedIndex,
   canHantei,
-  pending,
-  error,
+  isPending,
+  errorOf,
   onSelect,
   onChangeYakubun,
   onTab,
@@ -20,8 +33,8 @@ export function BunList({
   buns: Bun[];
   selectedIndex: number;
   canHantei: boolean;
-  pending: boolean;
-  error: string | null;
+  isPending: (index: number) => boolean;
+  errorOf: (index: number) => string | null;
   onSelect: (index: number) => void;
   onChangeYakubun: (yakubun: string) => void;
   onTab: () => void;
@@ -43,6 +56,8 @@ export function BunList({
         </span>,
       );
     }
+    const pending = isPending(index);
+    const status = bunStatusLabel(bun, pending);
     items.push(
       <button
         key={`bun-${index}`}
@@ -54,6 +69,7 @@ export function BunList({
         {index !== selectedIndex && bun.yakubun !== "" ? (
           <span className="bun-yakubun-preview">{bun.yakubun}</span>
         ) : null}
+        {status !== null ? <span className="bun-hantei-status">{status}</span> : null}
       </button>,
     );
   });
@@ -87,12 +103,15 @@ export function BunList({
           <YakubunField
             key={selectedIndex}
             value={selected.yakubun}
-            canHantei={canHantei}
             onChange={onChangeYakubun}
             onTab={onTab}
             onCtrlEnter={onCtrlEnter}
           />
-          <HanteiView bun={selected} pending={pending} error={error} />
+          <HanteiView
+            bun={selected}
+            pending={isPending(selectedIndex)}
+            error={errorOf(selectedIndex)}
+          />
         </div>
       ) : null}
     </div>
