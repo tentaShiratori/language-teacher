@@ -1,16 +1,13 @@
 import { afterEach, describe, expect, test, vi } from "vitest";
 import { renderHook, waitFor, act } from "@testing-library/react";
+import type { OllamaStatus, Settings } from "./ollama";
+import * as store from "./store";
 import { useOllama } from "./useOllama";
 
-const fetchOllamaStatus = vi.fn<() => Promise<import("./ollama").OllamaStatus>>();
-const loadSettings = vi.fn<() => Promise<import("./ollama").Settings>>();
-const saveSettings =
-  vi.fn<(settings: import("./ollama").Settings) => Promise<import("./ollama").OllamaStatus>>();
-
 vi.mock("./store", () => ({
-  fetchOllamaStatus: (...args: unknown[]) => fetchOllamaStatus(...args),
-  loadSettings: (...args: unknown[]) => loadSettings(...args),
-  saveSettings: (...args: unknown[]) => saveSettings(...args),
+  fetchOllamaStatus: vi.fn<() => Promise<OllamaStatus>>(),
+  loadSettings: vi.fn<() => Promise<Settings>>(),
+  saveSettings: vi.fn<(settings: Settings) => Promise<OllamaStatus>>(),
 }));
 
 afterEach(() => {
@@ -19,11 +16,11 @@ afterEach(() => {
 
 describe("useOllama", () => {
   test("起動時に設定と状態を取る", async () => {
-    loadSettings.mockResolvedValue({
+    vi.mocked(store.loadSettings).mockResolvedValue({
       ollamaBaseUrl: "http://127.0.0.1:11434",
       ollamaModel: "qwen3:8b",
     });
-    fetchOllamaStatus.mockResolvedValue({ kind: "ok" });
+    vi.mocked(store.fetchOllamaStatus).mockResolvedValue({ kind: "ok" });
 
     const { result } = renderHook(() => useOllama());
     await waitFor(() => expect(result.current.ready).toBe(true));
@@ -34,11 +31,11 @@ describe("useOllama", () => {
   });
 
   test("届かないときは判定できない", async () => {
-    loadSettings.mockResolvedValue({
+    vi.mocked(store.loadSettings).mockResolvedValue({
       ollamaBaseUrl: "http://127.0.0.1:11434",
       ollamaModel: "qwen3:8b",
     });
-    fetchOllamaStatus.mockResolvedValue({ kind: "unreachable" });
+    vi.mocked(store.fetchOllamaStatus).mockResolvedValue({ kind: "unreachable" });
 
     const { result } = renderHook(() => useOllama());
     await waitFor(() => expect(result.current.ready).toBe(true));
@@ -48,11 +45,14 @@ describe("useOllama", () => {
   });
 
   test("モデル無しを区別する", async () => {
-    loadSettings.mockResolvedValue({
+    vi.mocked(store.loadSettings).mockResolvedValue({
       ollamaBaseUrl: "http://127.0.0.1:11434",
       ollamaModel: "qwen3:8b",
     });
-    fetchOllamaStatus.mockResolvedValue({ kind: "modelMissing", model: "qwen3:8b" });
+    vi.mocked(store.fetchOllamaStatus).mockResolvedValue({
+      kind: "modelMissing",
+      model: "qwen3:8b",
+    });
 
     const { result } = renderHook(() => useOllama());
     await waitFor(() => expect(result.current.ready).toBe(true));
@@ -62,12 +62,15 @@ describe("useOllama", () => {
   });
 
   test("設定保存後に再検知する", async () => {
-    loadSettings.mockResolvedValue({
+    vi.mocked(store.loadSettings).mockResolvedValue({
       ollamaBaseUrl: "http://127.0.0.1:11434",
       ollamaModel: "qwen3:8b",
     });
-    fetchOllamaStatus.mockResolvedValue({ kind: "modelMissing", model: "qwen3:8b" });
-    saveSettings.mockResolvedValue({ kind: "ok" });
+    vi.mocked(store.fetchOllamaStatus).mockResolvedValue({
+      kind: "modelMissing",
+      model: "qwen3:8b",
+    });
+    vi.mocked(store.saveSettings).mockResolvedValue({ kind: "ok" });
 
     const { result } = renderHook(() => useOllama());
     await waitFor(() => expect(result.current.ready).toBe(true));
@@ -79,7 +82,7 @@ describe("useOllama", () => {
       });
     });
 
-    expect(saveSettings).toHaveBeenCalledWith({
+    expect(store.saveSettings).toHaveBeenCalledWith({
       ollamaBaseUrl: "http://127.0.0.1:11434",
       ollamaModel: "qwen3:14b",
     });
@@ -88,8 +91,8 @@ describe("useOllama", () => {
   });
 
   test("invoke 失敗は届かない扱い", async () => {
-    loadSettings.mockRejectedValue(new Error("ipc"));
-    fetchOllamaStatus.mockRejectedValue(new Error("ipc"));
+    vi.mocked(store.loadSettings).mockRejectedValue(new Error("ipc"));
+    vi.mocked(store.fetchOllamaStatus).mockRejectedValue(new Error("ipc"));
 
     const { result } = renderHook(() => useOllama());
     await waitFor(() => expect(result.current.ready).toBe(true));
