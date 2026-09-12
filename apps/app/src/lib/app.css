@@ -34,6 +34,14 @@ body {
   font-weight: 600;
 }
 
+html[data-debug] .app h1::after {
+  content: "（開発）";
+  margin-left: 0.4rem;
+  font-size: 0.75em;
+  font-weight: 500;
+  color: #6b5b00;
+}
+
 .genbun-paste,
 .gakushu-gengo-select,
 .bun-list,

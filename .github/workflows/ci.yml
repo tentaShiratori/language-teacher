@@ -124,5 +124,6 @@ jobs:
           add-rust-environment-hash-key: "false"
 
       - run: cargo fmt --check
-      - run: cargo clippy --all-targets -- -D warnings
+      - run: cargo clippy --all-targets --all-features -- -D warnings
       - run: cargo test
+      - run: cargo test --features debug

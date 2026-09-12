@@ -35,6 +35,7 @@
 ```
 apps/app/
   package.json
+  tauriCli.mjs         # `tauri dev` に tauri.dev.conf.json を付ける
   index.html
   vite.config.ts
   e2e/                 # WebDriver。Vitest と別。pnpm --filter @language-teacher/app e2e
@@ -48,6 +49,7 @@ apps/app/
       app.css
       appRoutes.tsx
       store.ts         # invoke 包み。型は bindings を再 export
+      debug.ts         # is_debug。html[data-debug] で画面を出し分け
       error_log.ts     # 未捕捉・握りつぶし → log_js_error
       ollama.ts
       openHanteiLogMado.ts
@@ -85,6 +87,7 @@ apps/app/
           *.test.tsx
   src-tauri/
     tauri.conf.json
+    tauri.dev.conf.json   # `tauri dev` で merge。identifier と debug feature
     Cargo.toml
     .cargo/config.toml # TS_RS_EXPORT_DIR → ../src/bindings
     src/
@@ -94,6 +97,7 @@ apps/app/
       hantei_log.rs
       error_log.rs
       store.rs
+      debug.rs
 ```
 
 ### 共有型の更新（ts-rs）
@@ -117,8 +121,11 @@ Rust のコマンド（IPC）は次だけ。保存の中身はコマンドの向
 | `load_settings` / `save_settings` | Ollama の URL とモデル名                       |
 | `list_hantei_log`                 | 判定ログを新しい順に返す（保存の中身は向こう） |
 | `log_js_error`                    | JS のエラー行を `error_js.jsonl` へ追記        |
+| `is_debug`                        | 開発用 feature / `tauri dev` なら true         |
 
-SQLite はアプリデータディレクトリ。スキーマは `store.rs` が持つ。判定のやり取りログはファイル。
+SQLite はアプリデータディレクトリ。場所は identifier 由来。`tauri build` は `com.tenta.language_teacher`。`tauri dev` は Cargo feature `debug` を付け、identifier を `com.tenta.language_teacher.debug` にする。開発実行と本番インストールで保存が混ざらない。機能のつけ外しは Cargo features（`debug` が土台）。フロントは `is_debug` と `html[data-debug]` で画面を出し分ける。
+
+スキーマは `store.rs` が持つ。判定のやり取りログはファイル。
 
 エラーログは判定ログと別。アプリデータディレクトリに `error_rust.jsonl`（コマンドの `Err` と panic）と `error_js.jsonl`（未捕捉と握りつぶした catch）。1行の形は `ErrorLogLine`（`at` / `message` / `stack`。`stack` は null 可）。
 

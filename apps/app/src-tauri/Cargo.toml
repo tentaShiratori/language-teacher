@@ -26,6 +26,9 @@ rusqlite = { version = "0.32", features = ["bundled"] }
 ureq = { version = "2", default-features = false, features = ["json"] }
 ts-rs = "12"
 
+[features]
+default = []
+debug = []
 
 # Read the optimization guideline for more details: https://tauri.app/concept/size/#cargo-configuration
 [profile.release]

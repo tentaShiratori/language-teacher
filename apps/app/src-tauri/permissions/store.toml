@@ -11,4 +11,5 @@ commands.allow = [
   "save_settings",
   "hantei_bun",
   "list_hantei_log",
+  "is_debug",
 ]
