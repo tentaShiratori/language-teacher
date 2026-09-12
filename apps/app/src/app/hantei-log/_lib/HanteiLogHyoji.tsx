@@ -22,8 +22,8 @@ function ParseKekka({ hantei, error }: { hantei?: Hantei | null; error?: string 
       {hantei.shiteki !== null && hantei.shiteki !== "" ? (
         <p className="hantei-shiteki">{hantei.shiteki}</p>
       ) : null}
-      {!hantei.tekisetsu && hantei.naoshitaYakubun !== null && hantei.naoshitaYakubun !== "" ? (
-        <p className="hantei-naoshita" aria-label="直した訳文">
+      {hantei.naoshitaYakubun !== null && hantei.naoshitaYakubun !== "" ? (
+        <p className="hantei-naoshita" aria-label={hantei.tekisetsu ? "自然な訳文" : "直した訳文"}>
           {hantei.naoshitaYakubun}
         </p>
       ) : null}

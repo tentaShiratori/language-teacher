@@ -53,11 +53,7 @@ pub fn normalize_hantei(raw: Hantei) -> Hantei {
         imi: raw.imi,
         bunpo: raw.bunpo,
         shiteki: raw.shiteki,
-        naoshita_yakubun: if tekisetsu {
-            None
-        } else {
-            raw.naoshita_yakubun.filter(|s| !s.is_empty())
-        },
+        naoshita_yakubun: raw.naoshita_yakubun.filter(|s| !s.is_empty()),
     }
 }
 
@@ -75,13 +71,16 @@ fn common_rules() -> &'static str {
     r#"あなたは言語学習の判定器である。
 適切 = 意味が原文と合う ∧ 文法が破綻していない。自然さとトーンは結論に入れない。
 指摘（shiteki）は適切でも不適切でも出す。適切さの判定には使わない。
-不適切なら直した訳文（naoshitaYakubun）に、意味と文法を直した学習言語の全文を書く。適切なら null。
+不適切なら直した訳文（naoshitaYakubun）に、意味と文法を直した学習言語の全文を書く。
+適切で、今の訳文より自然な学習言語の全文があれば naoshitaYakubun に書く。十分自然なら null。
+指摘には全文を混ぜない。
 
 言語共通:
 - 不適切（意味）: 訳文が原文と別のことを言っている。主語・否定・時制・数量の取り違えを含む
 - 不適切（文法）: 述語がない、一致が壊れている、語順が通らない
 - 指摘: 母語で直し方を書く。不適切なら、どこが不適切かも同じ文章に書く。十分自然なら「このままで自然」でよい
 - 直した訳文: 不適切のとき必須。学習言語の全文。指摘には混ぜない
+- 自然な訳文: 適切で今の訳文より自然なら学習言語の全文。十分自然なら null。指摘には混ぜない
 - 見ない: 米語／英語の綴り差だけ。指摘にもしない
 
 指摘は母語（日本語）で一文。
@@ -90,7 +89,7 @@ fn common_rules() -> &'static str {
 {"tekisetsu":true,"imi":true,"bunpo":true,"shiteki":"このままで自然","naoshitaYakubun":null}
 tekisetsu は imi && bunpo と一致させる。
 shiteki は適切でも不適切でも文字列。
-naoshitaYakubun は不適切なら学習言語の全文。適切なら null。"#
+naoshitaYakubun は不適切なら直した訳文の全文。適切なら、より自然な学習言語の全文。十分自然なら null。"#
 }
 
 fn gengo_hatantable(gakushu_gengo: &str) -> &'static str {
@@ -332,13 +331,26 @@ mod tests {
     }
 
     #[test]
-    fn normalize_drops_naoshita_yakubun_when_tekisetsu() {
+    fn normalize_keeps_naoshita_yakubun_when_tekisetsu() {
         let fixed = normalize_hantei(Hantei {
             tekisetsu: false,
             imi: true,
             bunpo: true,
-            shiteki: Some("このままで自然".into()),
+            shiteki: Some("もう少し自然に".into()),
             naoshita_yakubun: Some("I went.".into()),
+        });
+        assert!(fixed.tekisetsu);
+        assert_eq!(fixed.naoshita_yakubun.as_deref(), Some("I went."));
+    }
+
+    #[test]
+    fn normalize_drops_empty_naoshita_yakubun_when_tekisetsu() {
+        let fixed = normalize_hantei(Hantei {
+            tekisetsu: true,
+            imi: true,
+            bunpo: true,
+            shiteki: Some("このままで自然".into()),
+            naoshita_yakubun: Some("".into()),
         });
         assert!(fixed.tekisetsu);
         assert!(fixed.naoshita_yakubun.is_none());
@@ -372,6 +384,9 @@ mod tests {
         assert!(en.contains("このままで自然"));
         assert!(en.contains("適切でも不適切でも"));
         assert!(en.contains("naoshitaYakubun"));
+        assert!(en.contains("より自然"));
+        assert!(en.contains("十分自然なら null"));
+        assert!(!en.contains("適切なら null"));
         assert!(!en.contains("hinto"));
         assert!(!en.contains("ヒント"));
     }
