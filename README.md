@@ -26,6 +26,12 @@ Cursor はスタートメニューやタスクバーから開かない。Go 拡�
 cursor .
 ```
 
+実ウィンドウの e2e は WebDriver。Vitest とは別コマンド。手順は [docs/e2e.md](./docs/e2e.md)
+
+```bash
+pnpm --filter @language-teacher/app e2e
+```
+
 不要コードは fallow で見る。テストでしか使わないコードは `*.test.ts` かリポジトリ直下の `test/` に置く
 
 ```bash

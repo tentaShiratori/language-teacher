@@ -126,3 +126,70 @@ jobs:
       - run: cargo fmt --check
       - run: cargo clippy --all-targets -- -D warnings
       - run: cargo test
+
+  e2e:
+    name: e2e / webdriver
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+
+      - uses: jdx/mise-action@v4
+        with:
+          version: 2026.9.2
+          cache: true
+          install_args: node npm:pnpm rust
+
+      - name: Cache apt packages
+        uses: actions/cache@v6
+        with:
+          path: ~/.cache/apt-archives
+          key: ${{ runner.os }}-apt-tauri-e2e-v1
+
+      - name: Install Linux dependencies
+        env:
+          DEBIAN_FRONTEND: noninteractive
+        run: |
+          mkdir -p "$HOME/.cache/apt-archives/partial"
+          chmod -R a+rwX "$HOME/.cache/apt-archives"
+          sudo apt-get update
+          sudo apt-get \
+            -o Dir::Cache::archives="$HOME/.cache/apt-archives" \
+            -o APT::Keep-Downloaded-Packages=true \
+            install -y \
+            libwebkit2gtk-4.1-dev \
+            libgtk-3-dev \
+            libayatana-appindicator3-dev \
+            librsvg2-dev \
+            patchelf \
+            libssl-dev \
+            webkit2gtk-driver \
+            xvfb
+          # apt が root 所有の lock/partial を残すと actions/cache の保存が落ちる
+          sudo chown -R "$USER:$USER" "$HOME/.cache/apt-archives"
+          rm -f "$HOME/.cache/apt-archives/lock"
+          rm -rf "$HOME/.cache/apt-archives/partial"
+
+      - uses: Swatinem/rust-cache@v2
+        with:
+          workspaces: apps/app/src-tauri
+          shared-key: tauri-e2e
+          add-job-id-key: "false"
+          add-rust-environment-hash-key: "false"
+
+      - name: pnpm store path
+        run: echo "STORE_PATH=$(pnpm store path --silent)" >> "$GITHUB_ENV"
+
+      - uses: actions/cache@v6
+        with:
+          path: ${{ env.STORE_PATH }}
+          key: ${{ runner.os }}-pnpm-${{ hashFiles('pnpm-lock.yaml') }}
+          restore-keys: |
+            ${{ runner.os }}-pnpm-
+
+      - run: pnpm install --frozen-lockfile
+      - run: pnpm --filter @language-teacher/app build
+      - run: cargo build --release
+        working-directory: apps/app/src-tauri
+      - run: cargo install tauri-driver --locked
+      - name: WebdriverIO
+        run: xvfb-run -a pnpm --filter @language-teacher/app e2e

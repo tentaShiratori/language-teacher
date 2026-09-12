@@ -2,5 +2,7 @@ packages:
   - "apps/*"
   - "packages/*"
 allowBuilds:
+  edgedriver: false
   esbuild: true
+  geckodriver: false
   unrs-resolver: true
