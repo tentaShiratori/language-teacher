@@ -35,4 +35,4 @@ pre-commit:
     - name: clippy
       root: apps/app/src-tauri/
       glob: "*.rs"
-      run: cargo clippy --all-targets -- -D warnings
+      run: cargo clippy --all-targets --all-features -- -D warnings

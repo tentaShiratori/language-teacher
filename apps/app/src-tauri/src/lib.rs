@@ -1,3 +1,4 @@
+mod debug;
 mod error_log;
 mod hantei;
 mod hantei_log;
@@ -7,6 +8,7 @@ mod store;
 #[cfg(test)]
 mod export_bindings;
 
+use debug::is_debug;
 use error_log::{error_js_path, error_rust_path, install_panic_hook, log_js_error, ErrorLogPaths};
 use hantei::hantei_bun;
 use hantei_log::{hantei_log_path, list_hantei_log, HanteiLogPath};
@@ -16,6 +18,8 @@ use tauri::Manager;
 
 #[cfg_attr(mobile, tauri::mobile_entry_point)]
 pub fn run() {
+    let mut ctx = tauri::generate_context!();
+    debug::apply_identifier(ctx.config_mut());
     tauri::Builder::default()
         .plugin(tauri_plugin_opener::init())
         .setup(|app| {
@@ -43,8 +47,9 @@ pub fn run() {
             save_settings,
             hantei_bun,
             list_hantei_log,
-            log_js_error
+            log_js_error,
+            is_debug
         ])
-        .run(tauri::generate_context!())
+        .run(ctx)
         .expect("error while running tauri application");
 }

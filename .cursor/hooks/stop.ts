@@ -1,5 +1,6 @@
 import { spawnSync } from "node:child_process";
 import { join } from "node:path";
+import { hookEnv } from "./hook_env.ts";
 import { readStdinJson, repoRoot, writeJson } from "./io.ts";
 
 const input = readStdinJson<{ loop_count?: number }>();
@@ -40,6 +41,7 @@ for (const check of checks) {
   const result = spawnSync(check.command, check.args, {
     cwd: check.cwd,
     encoding: "utf8",
+    env: hookEnv(),
     shell: true,
     windowsHide: true,
   });

@@ -4,10 +4,16 @@ import { createHashRouter, RouterProvider } from "react-router";
 import App from "./app/App";
 import { HanteiLogMado } from "./app/hantei-log/HanteiLogMado";
 import { appRoutes } from "./lib/appRoutes";
-import { installGlobalErrorLog } from "./lib/error_log";
+import { applyDebugDataset, isDebug } from "./lib/debug";
+import { installGlobalErrorLog, logCaughtError } from "./lib/error_log";
 import "./lib/app.css";
 
 installGlobalErrorLog();
+void isDebug()
+  .then((debug) => {
+    applyDebugDataset(document.documentElement, debug);
+  })
+  .catch(logCaughtError);
 
 const router = createHashRouter(
   appRoutes({
