@@ -1,11 +1,12 @@
 import { spawn, spawnSync, type ChildProcess } from "node:child_process";
-import os from "node:os";
+import { existsSync } from "node:fs";
 import path from "node:path";
 import process from "node:process";
 import { fileURLToPath } from "node:url";
 import "@wdio/local-runner";
 import "@wdio/mocha-framework";
 import "@wdio/spec-reporter";
+import { cargoHomeBin } from "./cargo_home.ts";
 
 const dir = fileURLToPath(new URL(".", import.meta.url));
 const appRoot = path.resolve(dir, "..");
@@ -18,14 +19,17 @@ function releaseApp(): string {
   return path.join(srcTauri, "target", "release", `language_teacher${ext}`);
 }
 
-function tauriDriverBin(): string {
-  const cargoHome = process.env.CARGO_HOME ?? path.join(os.homedir(), ".cargo");
-  const name = process.platform === "win32" ? "tauri-driver.exe" : "tauri-driver";
-  return path.join(cargoHome, "bin", name);
-}
-
 function run(command: string, args: string[], cwd: string, shell = false): void {
-  const result = spawnSync(command, args, { cwd, stdio: "inherit", shell });
+  let result: ReturnType<typeof spawnSync>;
+  try {
+    result = spawnSync(command, args, { cwd, stdio: "inherit", shell, env: process.env });
+  } catch (error) {
+    const message = error instanceof Error ? error.message : String(error);
+    throw new Error(`${command} を起動できない: ${message}`);
+  }
+  if (result.error) {
+    throw new Error(`${command} を起動できない: ${result.error.message}`);
+  }
   if (result.status !== 0) {
     throw new Error(`${command} ${args.join(" ")} が失敗した`);
   }
@@ -76,12 +80,17 @@ export const config = {
 
   onPrepare: () => {
     run("pnpm", ["build"], appRoot, true);
-    run("cargo", ["build", "--release"], srcTauri);
+    const cargo = cargoHomeBin("cargo");
+    if (!existsSync(cargo)) {
+      throw new Error(`cargo が見つからない: ${cargo}`);
+    }
+    run(cargo, ["build", "--release"], srcTauri);
   },
 
   beforeSession: () => {
-    driver.process = spawn(tauriDriverBin(), [], {
+    driver.process = spawn(cargoHomeBin("tauri-driver"), [], {
       stdio: [null, process.stdout, process.stderr],
+      env: process.env,
     });
     driver.process.on("error", (error) => {
       console.error("tauri-driver error:", error);
