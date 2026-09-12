@@ -12,13 +12,19 @@ vi.mock("../../lib/store", () => ({
 
 type SetSession = (updater: (prev: GenbunSession | null) => GenbunSession | null) => void;
 
-const ok: Hantei = { tekisetsu: true, imi: true, bunpo: true, shiteki: null, hinto: null };
+const ok: Hantei = {
+  tekisetsu: true,
+  imi: true,
+  bunpo: true,
+  shiteki: null,
+  naoshitaYakubun: null,
+};
 const ng: Hantei = {
   tekisetsu: false,
   imi: false,
   bunpo: true,
-  shiteki: null,
-  hinto: "動詞がありません",
+  shiteki: "動詞がありません",
+  naoshitaYakubun: "I went.",
 };
 
 function emptyBun(body: string, yakubun = "") {
@@ -29,7 +35,7 @@ function emptyBun(body: string, yakubun = "") {
     imi: null as boolean | null,
     bunpo: null as boolean | null,
     shiteki: null as string | null,
-    hinto: null as string | null,
+    naoshitaYakubun: null as string | null,
   };
 }
 
@@ -135,13 +141,12 @@ describe("useHantei", () => {
       ...ok,
       shiteki: "もっと自然に",
     });
-    const h = harness(applyHantei(baseSession("Hello"), 0, { ...ng, hinto: "旧ヒント" }));
+    const h = harness(applyHantei(baseSession("Hello"), 0, { ...ng, shiteki: "旧指摘" }));
     act(() => {
       h.result.current.onCtrlEnter();
     });
     await waitFor(() => expect(h.current.buns[0]?.tekisetsu).toBe(true));
     expect(h.current.buns[0]?.shiteki).toBe("もっと自然に");
-    expect(h.current.buns[0]?.hinto).toBeNull();
   });
 
   test("失敗しても前の判定は残す", async () => {

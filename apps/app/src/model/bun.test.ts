@@ -9,7 +9,7 @@ function bun(body: string, overrides: Partial<Omit<Bun, "body">> = {}): Bun {
     imi: overrides.imi ?? null,
     bunpo: overrides.bunpo ?? null,
     shiteki: overrides.shiteki ?? null,
-    hinto: overrides.hinto ?? null,
+    naoshitaYakubun: overrides.naoshitaYakubun ?? null,
   };
 }
 
@@ -70,7 +70,7 @@ describe("mergeBun", () => {
         tekisetsu: false,
         imi: false,
         bunpo: true,
-        hinto: "動詞を",
+        shiteki: "動詞を",
       }),
       bun("う。"),
     ];

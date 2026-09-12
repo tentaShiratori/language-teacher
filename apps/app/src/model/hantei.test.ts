@@ -7,7 +7,7 @@ function raw(partial: Partial<Hantei> & Pick<Hantei, "imi" | "bunpo">): Hantei {
     imi: partial.imi,
     bunpo: partial.bunpo,
     shiteki: partial.shiteki ?? null,
-    hinto: partial.hinto ?? null,
+    naoshitaYakubun: partial.naoshitaYakubun ?? null,
   };
 }
 
@@ -29,7 +29,7 @@ describe("runHanteiIfNeeded", () => {
       imi: true,
       bunpo: true,
       shiteki: null,
-      hinto: null,
+      naoshitaYakubun: null,
     });
     expect(run).toHaveBeenCalledOnce();
   });
@@ -37,80 +37,92 @@ describe("runHanteiIfNeeded", () => {
   test("tekisetsu が imi && bunpo とずれたら補正する", async () => {
     await expect(
       runHanteiIfNeeded("Hi", async () =>
-        raw({ tekisetsu: true, imi: true, bunpo: false, shiteki: "指摘", hinto: "ヒント" }),
+        raw({
+          tekisetsu: true,
+          imi: true,
+          bunpo: false,
+          shiteki: "指摘",
+          naoshitaYakubun: "I went.",
+        }),
       ),
     ).resolves.toEqual({
       tekisetsu: false,
       imi: true,
       bunpo: false,
-      shiteki: null,
-      hinto: "ヒント",
+      shiteki: "指摘",
+      naoshitaYakubun: "I went.",
     });
 
     await expect(
       runHanteiIfNeeded("Hi", async () =>
-        raw({ tekisetsu: false, imi: true, bunpo: true, shiteki: "指摘", hinto: "ヒント" }),
+        raw({
+          tekisetsu: false,
+          imi: true,
+          bunpo: true,
+          shiteki: "指摘",
+          naoshitaYakubun: "I went.",
+        }),
       ),
     ).resolves.toEqual({
       tekisetsu: true,
       imi: true,
       bunpo: true,
       shiteki: "指摘",
-      hinto: null,
+      naoshitaYakubun: null,
     });
   });
 
-  test("不適切なら shiteki を捨てる", async () => {
+  test("不適切なら直した訳文を残す", async () => {
     await expect(
       runHanteiIfNeeded("Hi", async () =>
         raw({
           tekisetsu: false,
           imi: false,
           bunpo: true,
-          shiteki: "指摘は捨てる",
-          hinto: "動詞がありません",
+          shiteki: "動詞がありません",
+          naoshitaYakubun: "I went to school.",
         }),
       ),
     ).resolves.toEqual({
       tekisetsu: false,
       imi: false,
       bunpo: true,
-      shiteki: null,
-      hinto: "動詞がありません",
+      shiteki: "動詞がありません",
+      naoshitaYakubun: "I went to school.",
     });
   });
 
-  test("適切なら hinto を捨てる", async () => {
+  test("適切なら短い指摘を残し直した訳文は捨てる", async () => {
     await expect(
       runHanteiIfNeeded("Hi", async () =>
         raw({
           tekisetsu: true,
           imi: true,
           bunpo: true,
-          shiteki: "もう少し自然に",
-          hinto: "ヒントは捨てる",
+          shiteki: "このままで自然",
+          naoshitaYakubun: "I went.",
         }),
       ),
     ).resolves.toEqual({
       tekisetsu: true,
       imi: true,
       bunpo: true,
-      shiteki: "もう少し自然に",
-      hinto: null,
+      shiteki: "このままで自然",
+      naoshitaYakubun: null,
     });
   });
 
-  test("境界: imi も bunpo も false", async () => {
+  test("境界: 不適切で直した訳文が空なら null", async () => {
     await expect(
       runHanteiIfNeeded("Hi", async () =>
-        raw({ tekisetsu: true, imi: false, bunpo: false, shiteki: "指摘", hinto: null }),
+        raw({ tekisetsu: true, imi: false, bunpo: false, shiteki: "指摘", naoshitaYakubun: "" }),
       ),
     ).resolves.toEqual({
       tekisetsu: false,
       imi: false,
       bunpo: false,
-      shiteki: null,
-      hinto: null,
+      shiteki: "指摘",
+      naoshitaYakubun: null,
     });
   });
 });

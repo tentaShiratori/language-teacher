@@ -16,26 +16,17 @@ function ParseKekka({ hantei, error }: { hantei?: Hantei | null; error?: string 
   if (hantei === undefined || hantei === null) {
     return <p className="hantei-log-parse-empty">パース結果なし</p>;
   }
-  if (hantei.tekisetsu) {
-    return (
-      <div className="hantei-log-parse-ok">
-        <p className="hantei-kekka">適切</p>
-        {hantei.shiteki !== null && hantei.shiteki !== "" ? (
-          <p className="hantei-shiteki">{hantei.shiteki}</p>
-        ) : null}
-      </div>
-    );
-  }
   return (
-    <div className="hantei-log-parse-ng">
-      <p className="hantei-kekka">不適切</p>
-      {hantei.hinto !== null && hantei.hinto !== "" ? (
-        <p className="hantei-hinto">{hantei.hinto}</p>
+    <div className={hantei.tekisetsu ? "hantei-log-parse-ok" : "hantei-log-parse-ng"}>
+      <p className="hantei-kekka">{hantei.tekisetsu ? "適切" : "不適切"}</p>
+      {hantei.shiteki !== null && hantei.shiteki !== "" ? (
+        <p className="hantei-shiteki">{hantei.shiteki}</p>
       ) : null}
-      <ul className="hantei-ketsujo">
-        {hantei.imi === false ? <li>意味</li> : null}
-        {hantei.bunpo === false ? <li>文法</li> : null}
-      </ul>
+      {!hantei.tekisetsu && hantei.naoshitaYakubun !== null && hantei.naoshitaYakubun !== "" ? (
+        <p className="hantei-naoshita" aria-label="直した訳文">
+          {hantei.naoshitaYakubun}
+        </p>
+      ) : null}
     </div>
   );
 }

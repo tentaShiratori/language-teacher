@@ -20,7 +20,7 @@ function emptyBun(body: string) {
     imi: null as boolean | null,
     bunpo: null as boolean | null,
     shiteki: null as string | null,
-    hinto: null as string | null,
+    naoshitaYakubun: null as string | null,
   };
 }
 
@@ -143,14 +143,19 @@ describe("mergeSelected / resplitSelected", () => {
 });
 
 describe("applyHantei", () => {
-  const ok = { tekisetsu: true, imi: true, bunpo: true, shiteki: "指摘", hinto: null };
-  const ng = { tekisetsu: false, imi: false, bunpo: true, shiteki: null, hinto: "旧" };
+  const ok = { tekisetsu: true, imi: true, bunpo: true, shiteki: "指摘", naoshitaYakubun: null };
+  const ng = {
+    tekisetsu: false,
+    imi: false,
+    bunpo: true,
+    shiteki: "旧",
+    naoshitaYakubun: "I went.",
+  };
 
   test("指定した文の判定を上書きする", () => {
     const second = applyHantei(applyHantei(henshuSession(), 0, ng), 0, ok);
     expect(second.buns[0]?.tekisetsu).toBe(true);
     expect(second.buns[0]?.shiteki).toBe("指摘");
-    expect(second.buns[0]?.hinto).toBeNull();
     expect(second.buns[1]?.tekisetsu).toBeNull();
   });
 

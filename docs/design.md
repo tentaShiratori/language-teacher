@@ -149,8 +149,8 @@ bun
   tekisetsu       0 | 1 | null
   imi             0 | 1 | null
   bunpo           0 | 1 | null
-  shiteki         null 可
-  hinto           null 可
+  shiteki              null 可
+  naoshita_yakubun     不適切のとき。適切なら null
 
 settings
   ollama_base_url
@@ -208,8 +208,8 @@ Ollama が途中で落ちたら、その回は失敗。次の起動時検知ま�
 
 ### 判定の表示
 
-- 適切: 「適切」と、指摘があれば指摘
-- 不適切: 「不適切」とヒント。意味／文法のどちらが欠けたかは出してよい（`imi` / `bunpo`）。訳の全文は出さない
+- 適切: 「適切」と指摘
+- 不適切: 「不適切」と指摘と直した訳文。意味／文法のラベルは出さない
 
 ### 一覧と設定
 

@@ -7,9 +7,14 @@ function shouldCallHantei(yakubun: string): boolean {
   return yakubun !== "";
 }
 
+function nonempty(value: string | null): string | null {
+  return value !== null && value !== "" ? value : null;
+}
+
 /**
  * 応答を仕様どおりに直す。
- * `tekisetsu` は `imi && bunpo` に合わせ、不適切なら shiteki、適切なら hinto を捨てる。
+ * `tekisetsu` は `imi && bunpo` に合わせ、不適切でも shiteki を残す。
+ * 直した訳文は不適切のときだけ残す。
  */
 function normalizeHantei(raw: Hantei): Hantei {
   const tekisetsu = raw.imi && raw.bunpo;
@@ -17,8 +22,8 @@ function normalizeHantei(raw: Hantei): Hantei {
     tekisetsu,
     imi: raw.imi,
     bunpo: raw.bunpo,
-    shiteki: tekisetsu ? raw.shiteki : null,
-    hinto: tekisetsu ? null : raw.hinto,
+    shiteki: raw.shiteki,
+    naoshitaYakubun: tekisetsu ? null : nonempty(raw.naoshitaYakubun),
   };
 }
 

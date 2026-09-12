@@ -315,10 +315,14 @@ button:disabled {
 }
 
 .hantei-shiteki,
-.hantei-hinto,
+.hantei-naoshita,
 .hantei-pending,
 .hantei-error {
   margin: 0;
+}
+
+.hantei-naoshita {
+  font-weight: 600;
 }
 
 .hantei-pending {
@@ -327,13 +331,6 @@ button:disabled {
 
 .hantei-error {
   color: #b42318;
-}
-
-.hantei-ketsujo {
-  margin: 0;
-  padding-left: 1.25rem;
-  color: #555;
-  font-size: 0.95rem;
 }
 
 .settings-log-toggle {

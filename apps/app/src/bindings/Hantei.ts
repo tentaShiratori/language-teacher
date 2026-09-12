@@ -5,5 +5,5 @@ export type Hantei = {
   imi: boolean;
   bunpo: boolean;
   shiteki: string | null;
-  hinto: string | null;
+  naoshitaYakubun: string | null;
 };

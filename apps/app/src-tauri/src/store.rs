@@ -15,7 +15,7 @@ pub struct BunRecord {
     pub imi: Option<bool>,
     pub bunpo: Option<bool>,
     pub shiteki: Option<String>,
-    pub hinto: Option<String>,
+    pub naoshita_yakubun: Option<String>,
 }
 
 #[derive(Debug, Clone, Serialize, Deserialize, TS)]
@@ -96,6 +96,7 @@ impl Store {
               imi INTEGER,
               bunpo INTEGER,
               shiteki TEXT,
+              naoshita_yakubun TEXT,
               hinto TEXT
             );
 
@@ -109,6 +110,7 @@ impl Store {
             "#,
         )
         .map_err(|e| e.to_string())?;
+        let _ = conn.execute("ALTER TABLE bun ADD COLUMN naoshita_yakubun TEXT", []);
         Ok(())
     }
 
@@ -142,7 +144,7 @@ impl Store {
                 r#"
                 INSERT INTO bun (
                   id, genbun_id, position, body, yakubun,
-                  tekisetsu, imi, bunpo, shiteki, hinto
+                  tekisetsu, imi, bunpo, shiteki, naoshita_yakubun
                 ) VALUES (?1, ?2, ?3, ?4, ?5, ?6, ?7, ?8, ?9, ?10)
                 "#,
                 params![
@@ -155,7 +157,7 @@ impl Store {
                     opt_bool_to_sql(bun.imi),
                     opt_bool_to_sql(bun.bunpo),
                     bun.shiteki,
-                    bun.hinto,
+                    bun.naoshita_yakubun,
                 ],
             )
             .map_err(|e| e.to_string())?;
@@ -228,7 +230,7 @@ impl Store {
         let mut stmt = conn
             .prepare(
                 r#"
-                SELECT body, yakubun, tekisetsu, imi, bunpo, shiteki, hinto
+                SELECT body, yakubun, tekisetsu, imi, bunpo, shiteki, naoshita_yakubun
                 FROM bun
                 WHERE genbun_id = ?1
                 ORDER BY position ASC
@@ -245,7 +247,7 @@ impl Store {
                     imi: sql_to_opt_bool(row.get(3)?),
                     bunpo: sql_to_opt_bool(row.get(4)?),
                     shiteki: row.get(5)?,
-                    hinto: row.get(6)?,
+                    naoshita_yakubun: row.get(6)?,
                 })
             })
             .map_err(|e| e.to_string())?;
@@ -390,7 +392,7 @@ mod tests {
                     imi: None,
                     bunpo: None,
                     shiteki: None,
-                    hinto: None,
+                    naoshita_yakubun: None,
                 },
                 BunRecord {
                     body: "次の行。".to_string(),
@@ -399,7 +401,7 @@ mod tests {
                     imi: None,
                     bunpo: None,
                     shiteki: None,
-                    hinto: None,
+                    naoshita_yakubun: None,
                 },
             ],
         }
@@ -456,7 +458,7 @@ mod tests {
             imi: Some(true),
             bunpo: Some(false),
             shiteki: Some("指摘".to_string()),
-            hinto: None,
+            naoshita_yakubun: Some("I went.".to_string()),
         }];
         store.save_genbun(next).unwrap();
         let loaded = store.load_genbun("g5").unwrap().expect("exists");
@@ -464,6 +466,7 @@ mod tests {
         assert_eq!(loaded.buns[0].yakubun, "only");
         assert_eq!(loaded.buns[0].tekisetsu, Some(true));
         assert_eq!(loaded.buns[0].bunpo, Some(false));
+        assert_eq!(loaded.buns[0].naoshita_yakubun.as_deref(), Some("I went."));
     }
 
     #[test]
