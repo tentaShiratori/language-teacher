@@ -7,6 +7,8 @@ pre-commit:
   jobs:
     - name: oxfmt
       glob: "*.{js,jsx,ts,tsx,mjs,cjs,mts,cts,json,md,css,yml,yaml}"
+      exclude:
+        - ".cursor/**"
       run: pnpm exec oxfmt {staged_files}
       stage_fixed: true
 

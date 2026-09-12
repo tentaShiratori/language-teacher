@@ -9,7 +9,8 @@ const root = repoRoot();
 const turbo = join(root, "node_modules", "turbo", "bin", "turbo");
 const rustDir = join(root, "apps", "app", "src-tauri");
 
-const checks: { command: string; args: string[]; cwd: string }[] = [
+
+const checks: { command: string; args: string[]; cwd: string; shell?: boolean }[] = [
   {
     command: process.execPath,
     args: [turbo, "lint", "fmt:check", "typecheck", "//#dead-code", "test:run"],
@@ -39,6 +40,7 @@ for (const check of checks) {
   const result = spawnSync(check.command, check.args, {
     cwd: check.cwd,
     encoding: "utf8",
+    shell: true,
     windowsHide: true,
   });
   const output = `${result.stdout ?? ""}${result.stderr ?? ""}`

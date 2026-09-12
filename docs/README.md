@@ -8,6 +8,7 @@
 | [design.md](./design.md)                                                   | 画面・操作・データ・配置    |
 | [hantei.md](./hantei.md)                                                   | 判定基準と LLM 契約         |
 | [ollama.md](./ollama.md)                                                   | ローカル LLM の構築         |
+| [e2e.md](./e2e.md)                                                         | WebDriver の e2e            |
 | [adr/0001-tauri-only-no-go-api.md](./adr/0001-tauri-only-no-go-api.md)     | Web / Go API を置かない     |
 | [adr/0002-local-ollama.md](./adr/0002-local-ollama.md)                     | 判定は端末内 LLM            |
 | [adr/0003-ts-rs-for-shared-types.md](./adr/0003-ts-rs-for-shared-types.md) | Rust と TS の共有型は ts-rs |

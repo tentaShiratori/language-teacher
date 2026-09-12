@@ -37,6 +37,9 @@ apps/app/
   package.json
   index.html
   vite.config.ts
+  e2e/                 # WebDriver。Vitest と別。pnpm --filter @language-teacher/app e2e
+    wdio.conf.ts
+    App.e2e.ts
   src/
     main.tsx
     vite-env.d.ts
