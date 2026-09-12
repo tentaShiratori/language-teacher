@@ -1,0 +1,79 @@
+import { render, screen } from "@testing-library/react";
+import { describe, expect, test } from "vitest";
+import type { Bun } from "../../model/bun";
+import { HanteiView } from "./HanteiView";
+
+function bun(overrides: Partial<Bun> = {}): Bun {
+  return {
+    body: "行きます。",
+    yakubun: "I go.",
+    tekisetsu: null,
+    imi: null,
+    bunpo: null,
+    shiteki: null,
+    ...overrides,
+  };
+}
+
+describe("HanteiView", () => {
+  test("未判定で待ちもエラーもなければ出さない", () => {
+    const { container } = render(<HanteiView bun={bun()} pending={false} error={null} />);
+    expect(container.firstChild).toBeNull();
+  });
+
+  test("適切なら短い指摘を出す", () => {
+    render(
+      <HanteiView
+        bun={bun({ tekisetsu: true, imi: true, bunpo: true, shiteki: "このままで自然" })}
+        pending={false}
+        error={null}
+      />,
+    );
+    expect(screen.getByText("適切")).toBeTruthy();
+    expect(screen.getByText("このままで自然")).toBeTruthy();
+    expect(screen.queryByText("意味")).toBeNull();
+    expect(screen.queryByText("文法")).toBeNull();
+    expect(document.querySelector(".hantei-hinto")).toBeNull();
+    expect(document.querySelector(".hantei-ketsujo")).toBeNull();
+  });
+
+  test("不適切なら指摘を出し意味／文法は出さない", () => {
+    render(
+      <HanteiView
+        bun={bun({
+          tekisetsu: false,
+          imi: false,
+          bunpo: false,
+          shiteki: "動詞が無く、I went to school. が自然です",
+        })}
+        pending={false}
+        error={null}
+      />,
+    );
+    expect(screen.getByText("不適切")).toBeTruthy();
+    expect(screen.getByText("動詞が無く、I went to school. が自然です")).toBeTruthy();
+    expect(screen.queryByText("意味")).toBeNull();
+    expect(screen.queryByText("文法")).toBeNull();
+    expect(screen.queryByText("^")).toBeNull();
+    expect(document.querySelector(".hantei-hinto")).toBeNull();
+    expect(document.querySelector(".hantei-ketsujo")).toBeNull();
+  });
+
+  test("空の指摘は出さない", () => {
+    render(
+      <HanteiView
+        bun={bun({ tekisetsu: true, imi: true, bunpo: true, shiteki: "" })}
+        pending={false}
+        error={null}
+      />,
+    );
+    expect(screen.getByText("適切")).toBeTruthy();
+    expect(document.querySelector(".hantei-shiteki")).toBeNull();
+  });
+
+  test("判定中とエラーを出す", () => {
+    render(<HanteiView bun={bun()} pending={true} error="ollama down" />);
+    expect(screen.getByText("判定中")).toBeTruthy();
+    expect(screen.getByText("ollama down")).toBeTruthy();
+  });
+});

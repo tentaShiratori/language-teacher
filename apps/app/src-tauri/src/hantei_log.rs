@@ -143,7 +143,6 @@ mod tests {
             imi: true,
             bunpo: true,
             shiteki: Some("もう少し自然に".into()),
-            hinto: None,
         }
     }
 
@@ -157,7 +156,7 @@ mod tests {
             "qwen3:8b",
             "system",
             "user",
-            Some(r#"{"tekisetsu":true,"imi":true,"bunpo":true,"shiteki":"もう少し自然に","hinto":null}"#),
+            Some(r#"{"tekisetsu":true,"imi":true,"bunpo":true,"shiteki":"もう少し自然に"}"#),
             Ok(&hantei),
         )
         .unwrap();
@@ -220,7 +219,7 @@ mod tests {
             "qwen3:8b",
             "s",
             "u",
-            Some(r#"{"tekisetsu":true,"imi":true,"bunpo":true,"shiteki":null,"hinto":null}"#),
+            Some(r#"{"tekisetsu":true,"imi":true,"bunpo":true,"shiteki":null}"#),
             Ok(&hantei),
         )
         .unwrap();
@@ -285,7 +284,7 @@ mod tests {
             "qwen3:8b",
             "s2",
             "u2",
-            Some(r#"{"tekisetsu":true,"imi":true,"bunpo":true,"shiteki":null,"hinto":null}"#),
+            Some(r#"{"tekisetsu":true,"imi":true,"bunpo":true,"shiteki":null}"#),
             Ok(&hantei),
         )
         .unwrap();

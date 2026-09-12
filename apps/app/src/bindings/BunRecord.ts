@@ -7,5 +7,4 @@ export type BunRecord = {
   imi: boolean | null;
   bunpo: boolean | null;
   shiteki: string | null;
-  hinto: string | null;
 };
