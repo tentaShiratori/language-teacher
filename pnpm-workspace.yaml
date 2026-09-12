@@ -1,6 +1,8 @@
 packages:
   - "apps/*"
   - "packages/*"
+# pnpm 11 の既定は script 前に install。turbo 並列と競合して ENOENT になる
+verifyDepsBeforeRun: false
 allowBuilds:
   edgedriver: false
   esbuild: true
