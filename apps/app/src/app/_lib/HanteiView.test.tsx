@@ -32,10 +32,32 @@ describe("HanteiView", () => {
     );
     expect(screen.getByText("適切")).toBeTruthy();
     expect(screen.getByText("このままで自然")).toBeTruthy();
+    expect(screen.queryByLabelText("自然な訳文")).toBeNull();
+    expect(screen.queryByLabelText("直した訳文")).toBeNull();
     expect(screen.queryByText("意味")).toBeNull();
     expect(screen.queryByText("文法")).toBeNull();
     expect(document.querySelector(".hantei-hinto")).toBeNull();
     expect(document.querySelector(".hantei-ketsujo")).toBeNull();
+  });
+
+  test("適切でより自然な訳文があれば自然な訳文として出す", () => {
+    render(
+      <HanteiView
+        bun={bun({
+          tekisetsu: true,
+          imi: true,
+          bunpo: true,
+          shiteki: "もう少し自然に",
+          naoshitaYakubun: "I went.",
+        })}
+        pending={false}
+        error={null}
+      />,
+    );
+    expect(screen.getByText("適切")).toBeTruthy();
+    expect(screen.getByText("もう少し自然に")).toBeTruthy();
+    expect(screen.getByLabelText("自然な訳文").textContent).toBe("I went.");
+    expect(screen.queryByLabelText("直した訳文")).toBeNull();
   });
 
   test("不適切なら指摘と直した訳文を出し意味／文法は出さない", () => {

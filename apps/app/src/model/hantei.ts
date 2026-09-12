@@ -14,7 +14,7 @@ function nonempty(value: string | null): string | null {
 /**
  * 応答を仕様どおりに直す。
  * `tekisetsu` は `imi && bunpo` に合わせ、不適切でも shiteki を残す。
- * 直した訳文は不適切のときだけ残す。
+ * naoshitaYakubun は空でなければ残す（適切なら自然な訳文、不適切なら直した訳文）。
  */
 function normalizeHantei(raw: Hantei): Hantei {
   const tekisetsu = raw.imi && raw.bunpo;
@@ -23,7 +23,7 @@ function normalizeHantei(raw: Hantei): Hantei {
     imi: raw.imi,
     bunpo: raw.bunpo,
     shiteki: raw.shiteki,
-    naoshitaYakubun: tekisetsu ? null : nonempty(raw.naoshitaYakubun),
+    naoshitaYakubun: nonempty(raw.naoshitaYakubun),
   };
 }
 
