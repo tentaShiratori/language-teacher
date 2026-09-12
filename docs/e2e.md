@@ -2,7 +2,7 @@
 
 Tauri の [WebDriver](https://v2.tauri.app/ja/develop/tests/webdriver/) と WebdriverIO で、リリースバイナリを実ウィンドウとして通す。Vitest（`pnpm test run {ファイル名}`）とは別コマンド。
 
-デスクトップは Linux と Windows だけ。macOS は WKWebView ドライバが無い。CI は Linux。ローカルは Windows。判定（Ollama）はこの spec では打たない。
+デスクトップは Linux と Windows だけ。macOS は WKWebView ドライバが無い。CI の Linux 実行は [e2e ワークフロー](../.github/workflows/e2e.yml) を `workflow_dispatch` で手動起動する。ローカルは Windows。判定（Ollama）はこの spec では打たない。
 
 ## 実行
 

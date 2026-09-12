@@ -10,7 +10,7 @@ export default defineConfig(() => ({
     environment: "jsdom",
     passWithNoTests: true,
     globals: true,
-    exclude: ["**/e2e/**/*.e2e.ts", "**/e2e/wdio.conf.ts", "**/node_modules/**", "**/dist/**"],
+    exclude: ["**/e2e/**", "**/node_modules/**", "**/dist/**"],
   },
   // Vite options tailored for Tauri development and only applied in `tauri dev` or `tauri build`
   //

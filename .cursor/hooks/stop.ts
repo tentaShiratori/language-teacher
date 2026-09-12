@@ -1,6 +1,5 @@
 import { spawnSync } from "node:child_process";
 import { join } from "node:path";
-import { cargoBin } from "./cargo_bin.ts";
 import { readStdinJson, repoRoot, writeJson } from "./io.ts";
 
 const input = readStdinJson<{ loop_count?: number }>();
@@ -10,28 +9,29 @@ const root = repoRoot();
 const turbo = join(root, "node_modules", "turbo", "bin", "turbo");
 const rustDir = join(root, "apps", "app", "src-tauri");
 
-const cargo = cargoBin();
-
-const checks: { command: string; args: string[]; cwd: string }[] = [
+const checks: { command: string; args: string[]; cwd: string; shell?: boolean }[] = [
   {
     command: process.execPath,
     args: [turbo, "lint", "fmt:check", "typecheck", "//#dead-code", "test:run"],
     cwd: root,
   },
   {
-    command: cargo,
+    command: "cargo",
     args: ["fmt", "--check"],
     cwd: rustDir,
+    shell: true,
   },
   {
-    command: cargo,
+    command: "cargo",
     args: ["clippy", "--all-targets", "--", "-D", "warnings"],
     cwd: rustDir,
+    shell: true,
   },
   {
-    command: cargo,
+    command: "cargo",
     args: ["test"],
     cwd: rustDir,
+    shell: true,
   },
 ];
 
@@ -43,6 +43,7 @@ for (const check of checks) {
     cwd: check.cwd,
     encoding: "utf8",
     env: process.env,
+    shell: check.shell ?? false,
     windowsHide: true,
   });
   const output = `${result.stdout ?? ""}${result.stderr ?? ""}`

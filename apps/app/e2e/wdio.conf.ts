@@ -1,12 +1,10 @@
 import { spawn, spawnSync, type ChildProcess } from "node:child_process";
-import { existsSync } from "node:fs";
 import path from "node:path";
 import process from "node:process";
 import { fileURLToPath } from "node:url";
 import "@wdio/local-runner";
 import "@wdio/mocha-framework";
 import "@wdio/spec-reporter";
-import { cargoHomeBin } from "./cargo_home.ts";
 
 const dir = fileURLToPath(new URL(".", import.meta.url));
 const appRoot = path.resolve(dir, "..");
@@ -19,14 +17,13 @@ function releaseApp(): string {
   return path.join(srcTauri, "target", "release", `language_teacher${ext}`);
 }
 
-function run(command: string, args: string[], cwd: string, shell = false): void {
-  let result: ReturnType<typeof spawnSync>;
-  try {
-    result = spawnSync(command, args, { cwd, stdio: "inherit", shell, env: process.env });
-  } catch (error) {
-    const message = error instanceof Error ? error.message : String(error);
-    throw new Error(`${command} を起動できない: ${message}`);
-  }
+function run(command: string, args: string[], cwd: string): void {
+  const result = spawnSync(command, args, {
+    cwd,
+    stdio: "inherit",
+    shell: true,
+    env: process.env,
+  });
   if (result.error) {
     throw new Error(`${command} を起動できない: ${result.error.message}`);
   }
@@ -79,18 +76,15 @@ export const config = {
   connectionRetryCount: 3,
 
   onPrepare: () => {
-    run("pnpm", ["build"], appRoot, true);
-    const cargo = cargoHomeBin("cargo");
-    if (!existsSync(cargo)) {
-      throw new Error(`cargo が見つからない: ${cargo}`);
-    }
-    run(cargo, ["build", "--release"], srcTauri);
+    run("pnpm", ["build"], appRoot);
+    run("cargo", ["build", "--release"], srcTauri);
   },
 
   beforeSession: () => {
-    driver.process = spawn(cargoHomeBin("tauri-driver"), [], {
+    driver.process = spawn("tauri-driver", [], {
       stdio: [null, process.stdout, process.stderr],
       env: process.env,
+      shell: true,
     });
     driver.process.on("error", (error) => {
       console.error("tauri-driver error:", error);
