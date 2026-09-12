@@ -5,12 +5,13 @@ export type Bun = BunRecord;
 
 const KUKEN = new Set(["。", "！", "？", "．"]);
 
-function miseitei(): Pick<Bun, "tekisetsu" | "imi" | "bunpo" | "shiteki"> {
+function miseitei(): Pick<Bun, "tekisetsu" | "imi" | "bunpo" | "shiteki" | "naoshitaYakubun"> {
   return {
     tekisetsu: null,
     imi: null,
     bunpo: null,
     shiteki: null,
+    naoshitaYakubun: null,
   };
 }
 

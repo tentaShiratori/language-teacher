@@ -315,9 +315,14 @@ button:disabled {
 }
 
 .hantei-shiteki,
+.hantei-naoshita,
 .hantei-pending,
 .hantei-error {
   margin: 0;
+}
+
+.hantei-naoshita {
+  font-weight: 600;
 }
 
 .hantei-pending {

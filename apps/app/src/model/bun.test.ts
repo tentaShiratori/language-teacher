@@ -9,6 +9,7 @@ function bun(body: string, overrides: Partial<Omit<Bun, "body">> = {}): Bun {
     imi: overrides.imi ?? null,
     bunpo: overrides.bunpo ?? null,
     shiteki: overrides.shiteki ?? null,
+    naoshitaYakubun: overrides.naoshitaYakubun ?? null,
   };
 }
 

@@ -16,6 +16,7 @@ function savedSession(): GenbunSession {
         imi: null,
         bunpo: null,
         shiteki: null,
+        naoshitaYakubun: null,
       },
     ],
     selectedIndex: 0,
@@ -63,6 +64,7 @@ describe("toRecord / fromRecord", () => {
           imi: true,
           bunpo: true,
           shiteki: "指摘",
+          naoshitaYakubun: null,
         },
       ],
     };

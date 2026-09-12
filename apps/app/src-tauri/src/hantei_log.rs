@@ -143,6 +143,7 @@ mod tests {
             imi: true,
             bunpo: true,
             shiteki: Some("もう少し自然に".into()),
+            naoshita_yakubun: None,
         }
     }
 

@@ -30,6 +30,7 @@ describe("HanteiLogHyoji", () => {
               imi: true,
               bunpo: true,
               shiteki: "もう少し自然に",
+              naoshitaYakubun: null,
             },
           }),
         ]}
@@ -42,7 +43,7 @@ describe("HanteiLogHyoji", () => {
     expect(screen.getByText("もう少し自然に")).toBeTruthy();
   });
 
-  test("不適切でも指摘を出し意味／文法は出さない", () => {
+  test("不適切なら指摘と直した訳文を出し意味／文法は出さない", () => {
     render(
       <HanteiLogHyoji
         items={[
@@ -51,14 +52,16 @@ describe("HanteiLogHyoji", () => {
               tekisetsu: false,
               imi: false,
               bunpo: false,
-              shiteki: "動詞が無く、I went to school. が自然です",
+              shiteki: "動詞がありません",
+              naoshitaYakubun: "I went to school.",
             },
           }),
         ]}
       />,
     );
     expect(screen.getByText("不適切")).toBeTruthy();
-    expect(screen.getByText("動詞が無く、I went to school. が自然です")).toBeTruthy();
+    expect(screen.getByText("動詞がありません")).toBeTruthy();
+    expect(screen.getByLabelText("直した訳文").textContent).toBe("I went to school.");
     expect(screen.queryByText("意味")).toBeNull();
     expect(screen.queryByText("文法")).toBeNull();
   });

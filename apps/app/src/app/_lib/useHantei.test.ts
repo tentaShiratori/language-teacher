@@ -12,12 +12,19 @@ vi.mock("../../lib/store", () => ({
 
 type SetSession = (updater: (prev: GenbunSession | null) => GenbunSession | null) => void;
 
-const ok: Hantei = { tekisetsu: true, imi: true, bunpo: true, shiteki: null };
+const ok: Hantei = {
+  tekisetsu: true,
+  imi: true,
+  bunpo: true,
+  shiteki: null,
+  naoshitaYakubun: null,
+};
 const ng: Hantei = {
   tekisetsu: false,
   imi: false,
   bunpo: true,
-  shiteki: "動詞が無く、I went. が自然です",
+  shiteki: "動詞がありません",
+  naoshitaYakubun: "I went.",
 };
 
 function emptyBun(body: string, yakubun = "") {
@@ -28,6 +35,7 @@ function emptyBun(body: string, yakubun = "") {
     imi: null as boolean | null,
     bunpo: null as boolean | null,
     shiteki: null as string | null,
+    naoshitaYakubun: null as string | null,
   };
 }
 

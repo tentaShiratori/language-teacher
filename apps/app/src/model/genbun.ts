@@ -22,6 +22,7 @@ function toBun(body: string): Bun {
     imi: null,
     bunpo: null,
     shiteki: null,
+    naoshitaYakubun: null,
   };
 }
 
@@ -171,6 +172,7 @@ export function applyHantei(session: GenbunSession, index: number, hantei: Hante
         imi: hantei.imi,
         bunpo: hantei.bunpo,
         shiteki: hantei.shiteki,
+        naoshitaYakubun: hantei.naoshitaYakubun,
       },
       ...session.buns.slice(index + 1),
     ],

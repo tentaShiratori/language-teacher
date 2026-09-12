@@ -11,6 +11,7 @@ function bun(overrides: Partial<Bun> = {}): Bun {
     imi: null,
     bunpo: null,
     shiteki: null,
+    naoshitaYakubun: null,
     ...overrides,
   };
 }
@@ -37,21 +38,23 @@ describe("HanteiView", () => {
     expect(document.querySelector(".hantei-ketsujo")).toBeNull();
   });
 
-  test("不適切なら指摘を出し意味／文法は出さない", () => {
+  test("不適切なら指摘と直した訳文を出し意味／文法は出さない", () => {
     render(
       <HanteiView
         bun={bun({
           tekisetsu: false,
           imi: false,
           bunpo: false,
-          shiteki: "動詞が無く、I went to school. が自然です",
+          shiteki: "動詞がありません",
+          naoshitaYakubun: "I went to school.",
         })}
         pending={false}
         error={null}
       />,
     );
     expect(screen.getByText("不適切")).toBeTruthy();
-    expect(screen.getByText("動詞が無く、I went to school. が自然です")).toBeTruthy();
+    expect(screen.getByText("動詞がありません")).toBeTruthy();
+    expect(screen.getByLabelText("直した訳文").textContent).toBe("I went to school.");
     expect(screen.queryByText("意味")).toBeNull();
     expect(screen.queryByText("文法")).toBeNull();
     expect(screen.queryByText("^")).toBeNull();

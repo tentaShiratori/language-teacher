@@ -42,6 +42,7 @@ describe("HanteiLogMado", () => {
           imi: true,
           bunpo: true,
           shiteki: "もう少し自然に",
+          naoshitaYakubun: null,
         },
       }),
     ]);

@@ -17,6 +17,7 @@ export function HanteiView({
 
   const kekka = tekisetsu ? "適切" : futekisetsu ? "不適切" : null;
   const hasShiteki = bun.shiteki !== null && bun.shiteki !== "";
+  const hasNaoshita = bun.naoshitaYakubun !== null && bun.naoshitaYakubun !== "";
 
   return (
     <div className="hantei-view">
@@ -26,6 +27,11 @@ export function HanteiView({
         <div className={tekisetsu ? "hantei-tekisetsu" : "hantei-futekisetsu"}>
           <p className="hantei-kekka">{kekka}</p>
           {hasShiteki ? <p className="hantei-shiteki">{bun.shiteki}</p> : null}
+          {futekisetsu && hasNaoshita ? (
+            <p className="hantei-naoshita" aria-label="直した訳文">
+              {bun.naoshitaYakubun}
+            </p>
+          ) : null}
         </div>
       ) : null}
     </div>

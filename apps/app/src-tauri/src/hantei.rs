@@ -13,6 +13,8 @@ pub struct Hantei {
     pub imi: bool,
     pub bunpo: bool,
     pub shiteki: Option<String>,
+    #[serde(default)]
+    pub naoshita_yakubun: Option<String>,
 }
 
 #[derive(Debug, Serialize)]
@@ -51,6 +53,11 @@ pub fn normalize_hantei(raw: Hantei) -> Hantei {
         imi: raw.imi,
         bunpo: raw.bunpo,
         shiteki: raw.shiteki,
+        naoshita_yakubun: if tekisetsu {
+            None
+        } else {
+            raw.naoshita_yakubun.filter(|s| !s.is_empty())
+        },
     }
 }
 
@@ -68,19 +75,22 @@ fn common_rules() -> &'static str {
     r#"あなたは言語学習の判定器である。
 適切 = 意味が原文と合う ∧ 文法が破綻していない。自然さとトーンは結論に入れない。
 指摘（shiteki）は適切でも不適切でも出す。適切さの判定には使わない。
+不適切なら直した訳文（naoshitaYakubun）に、意味と文法を直した学習言語の全文を書く。適切なら null。
 
 言語共通:
 - 不適切（意味）: 訳文が原文と別のことを言っている。主語・否定・時制・数量の取り違えを含む
 - 不適切（文法）: 述語がない、一致が壊れている、語順が通らない
-- 指摘: 直し方と自然な訳を一つの文章に混ぜる。不適切なら、どこが不適切かも同じ文章に書く。十分自然なら「このままで自然」でよく、直した全文は必須にしない
+- 指摘: 母語で直し方を書く。不適切なら、どこが不適切かも同じ文章に書く。十分自然なら「このままで自然」でよい
+- 直した訳文: 不適切のとき必須。学習言語の全文。指摘には混ぜない
 - 見ない: 米語／英語の綴り差だけ。指摘にもしない
 
-指摘は母語（日本語）で一文。直し方と自然な訳を混ぜてよい。不適切ならどこが不適切かも書く。
+指摘は母語（日本語）で一文。
 
 応答は次の JSON オブジェクトだけを返す。前後に説明文を付けない。
-{"tekisetsu":true,"imi":true,"bunpo":true,"shiteki":"このままで自然"}
+{"tekisetsu":true,"imi":true,"bunpo":true,"shiteki":"このままで自然","naoshitaYakubun":null}
 tekisetsu は imi && bunpo と一致させる。
-shiteki は適切でも不適切でも文字列。"#
+shiteki は適切でも不適切でも文字列。
+naoshitaYakubun は不適切なら学習言語の全文。適切なら null。"#
 }
 
 fn gengo_hatantable(gakushu_gengo: &str) -> &'static str {
@@ -306,7 +316,8 @@ mod tests {
             tekisetsu: true,
             imi: true,
             bunpo: false,
-            shiteki: Some("動詞がなく、I went. が自然です".into()),
+            shiteki: Some("動詞がありません".into()),
+            naoshita_yakubun: Some("I went.".into()),
         });
         assert_eq!(
             fixed,
@@ -314,22 +325,34 @@ mod tests {
                 tekisetsu: false,
                 imi: true,
                 bunpo: false,
-                shiteki: Some("動詞がなく、I went. が自然です".into()),
+                shiteki: Some("動詞がありません".into()),
+                naoshita_yakubun: Some("I went.".into()),
             }
         );
     }
 
     #[test]
+    fn normalize_drops_naoshita_yakubun_when_tekisetsu() {
+        let fixed = normalize_hantei(Hantei {
+            tekisetsu: false,
+            imi: true,
+            bunpo: true,
+            shiteki: Some("このままで自然".into()),
+            naoshita_yakubun: Some("I went.".into()),
+        });
+        assert!(fixed.tekisetsu);
+        assert!(fixed.naoshita_yakubun.is_none());
+    }
+
+    #[test]
     fn parse_strips_think_and_keeps_shiteki_when_futekisetsu() {
         let content = r#"<think>reason</think>
-{"tekisetsu":false,"imi":false,"bunpo":true,"shiteki":"動詞が無く、I went to school. が自然です","hinto":"捨てる"}
+{"tekisetsu":false,"imi":false,"bunpo":true,"shiteki":"動詞がありません","naoshitaYakubun":"I went to school.","hinto":"捨てる"}
 "#;
         let h = parse_hantei_content(content).unwrap();
         assert!(!h.tekisetsu);
-        assert_eq!(
-            h.shiteki.as_deref(),
-            Some("動詞が無く、I went to school. が自然です")
-        );
+        assert_eq!(h.shiteki.as_deref(), Some("動詞がありません"));
+        assert_eq!(h.naoshita_yakubun.as_deref(), Some("I went to school."));
     }
 
     #[test]
@@ -348,6 +371,7 @@ mod tests {
         assert!(en.contains("適切 ="));
         assert!(en.contains("このままで自然"));
         assert!(en.contains("適切でも不適切でも"));
+        assert!(en.contains("naoshitaYakubun"));
         assert!(!en.contains("hinto"));
         assert!(!en.contains("ヒント"));
     }
