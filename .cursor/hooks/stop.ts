@@ -9,6 +9,7 @@ const root = repoRoot();
 const turbo = join(root, "node_modules", "turbo", "bin", "turbo");
 const rustDir = join(root, "apps", "app", "src-tauri");
 
+
 const checks: { command: string; args: string[]; cwd: string; shell?: boolean }[] = [
   {
     command: process.execPath,
@@ -19,19 +20,16 @@ const checks: { command: string; args: string[]; cwd: string; shell?: boolean }[
     command: "cargo",
     args: ["fmt", "--check"],
     cwd: rustDir,
-    shell: true,
   },
   {
     command: "cargo",
     args: ["clippy", "--all-targets", "--", "-D", "warnings"],
     cwd: rustDir,
-    shell: true,
   },
   {
     command: "cargo",
     args: ["test"],
     cwd: rustDir,
-    shell: true,
   },
 ];
 
@@ -42,8 +40,7 @@ for (const check of checks) {
   const result = spawnSync(check.command, check.args, {
     cwd: check.cwd,
     encoding: "utf8",
-    env: process.env,
-    shell: check.shell ?? false,
+    shell: true,
     windowsHide: true,
   });
   const output = `${result.stdout ?? ""}${result.stderr ?? ""}`
