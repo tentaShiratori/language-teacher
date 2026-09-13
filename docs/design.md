@@ -79,7 +79,7 @@ apps/app/
         *.test.ts
         *.test.tsx
       hantei-log/
-        HanteiLogMado.tsx   # 判定ログ窓（/hantei-log）
+        HanteiLogMado.tsx   # 判定ログ窓（/hantei-log）。debug のときだけ開く
         HanteiLogMado.test.tsx
         _lib/
           HanteiLogHyoji.tsx
@@ -161,7 +161,7 @@ settings
 
 ## 画面
 
-本編ウィンドウと、設定から開く判定ログ用の第2ウィンドウ。同じ SPA を `react-router` の Hash 履歴で分ける（[ADR 0004](./adr/0004-react-router-hash.md)）。ログインは無い。判定ログウィンドウはログ表示だけを持ち、本編の編集状態は持たない。同じラベルのウィンドウが既にあれば前面に出す。
+本編ウィンドウと、設定から開く判定ログ用の第2ウィンドウ。判定ログの第2ウィンドウと設定の「判定ログ」は debug（`tauri dev` / `is_debug`）のときだけ。本番では出さない。同じ SPA を `react-router` の Hash 履歴で分ける（[ADR 0004](./adr/0004-react-router-hash.md)）。ログインは無い。判定ログウィンドウはログ表示だけを持ち、本編の編集状態は持たない。同じラベルのウィンドウが既にあれば前面に出す。debug でなければ窓を作らず、既存があっても前面に出さない。
 
 ### 起動
 
@@ -216,7 +216,7 @@ Ollama が途中で落ちたら、その回は失敗。次の起動時検知ま�
 - 一覧は原文の先頭行と学習言語と日時
 - 開くと、文・訳文・判定が戻る
 - 消せる
-- 設定: Ollama の URL、モデル（`qwen3:8b` / `qwen3:14b`）。保存後に再検知。判定ログはボタンから別ウィンドウで開く（パネル内には埋め込まない）
+- 設定: Ollama の URL、モデル（`qwen3:8b` / `qwen3:14b`）。保存後に再検知。debug のときだけ「判定ログ」ボタンを出し、別ウィンドウで開く。本番では出さない（パネル内には埋め込まない）
 
 ## 状態の流れ
 
