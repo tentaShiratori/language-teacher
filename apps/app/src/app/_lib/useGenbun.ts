@@ -74,14 +74,15 @@ export function useGenbun() {
   }
 
   function onSelectGengo(gengo: GakushuGengo) {
-    setSession((prev) => {
-      if (prev === null) {
-        return prev;
-      }
-      const next = selectGengo(prev, gengo);
-      void persist(next);
-      return next;
-    });
+    if (session === null) {
+      return;
+    }
+    const next = selectGengo(session, gengo);
+    if (next === session) {
+      return;
+    }
+    setSession(next);
+    void persist(next);
   }
 
   function onSelectBun(index: number) {
