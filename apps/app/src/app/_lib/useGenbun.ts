@@ -7,6 +7,7 @@ import {
   resplitSelected,
   selectBun,
   selectGengo,
+  setInyoMoto,
   setYakubun,
   startGenbun,
   toRecord,
@@ -66,11 +67,22 @@ export function useGenbun() {
       });
   }
 
-  function onPaste(body: string) {
-    const next = startGenbun(body);
+  function onPaste(body: string, inyoMoto = "") {
+    const next = startGenbun(body, inyoMoto);
     if (next !== null) {
       setSession(next);
     }
+  }
+
+  function onChangeInyoMoto(inyoMoto: string) {
+    setSession((prev) => {
+      if (prev === null) {
+        return prev;
+      }
+      const next = setInyoMoto(prev, inyoMoto);
+      void persist(next);
+      return next;
+    });
   }
 
   function onSelectGengo(gengo: GakushuGengo) {
@@ -159,6 +171,7 @@ export function useGenbun() {
     phase,
     ichiran,
     onPaste,
+    onChangeInyoMoto,
     onSelectGengo,
     onSelectBun,
     onChangeYakubun,
