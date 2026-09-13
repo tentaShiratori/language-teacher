@@ -179,9 +179,10 @@ describe("useGenbun", () => {
     act(() => {
       result.current.onChangeInyoMoto("書名");
     });
-    await waitFor(() =>
-      expect(vi.mocked(store.saveGenbun).mock.calls.at(-1)?.[0].inyoMoto).toBe("書名"),
-    );
+    await waitFor(() => {
+      const calls = vi.mocked(store.saveGenbun).mock.calls;
+      expect(calls[calls.length - 1]?.[0].inyoMoto).toBe("書名");
+    });
 
     await act(async () => {
       await result.current.onOpen(id!);
