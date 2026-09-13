@@ -1,4 +1,6 @@
-import { useState, type FormEvent } from "react";
+import { useEffect, useState, type FormEvent } from "react";
+import { isDebug } from "../../lib/debug";
+import { logCaughtError } from "../../lib/error_log";
 import { isOllamaModel, OLLAMA_MODELS, type Settings as SettingsValue } from "../../lib/ollama";
 import { openHanteiLogMado } from "../../lib/openHanteiLogMado";
 
@@ -10,6 +12,21 @@ export function Settings({
   onSave: (settings: SettingsValue) => void | Promise<void>;
 }) {
   const [open, setOpen] = useState(false);
+  const [debug, setDebug] = useState(false);
+
+  useEffect(() => {
+    let alive = true;
+    void isDebug()
+      .then((next) => {
+        if (alive) {
+          setDebug(next);
+        }
+      })
+      .catch(logCaughtError);
+    return () => {
+      alive = false;
+    };
+  }, []);
 
   return (
     <section className="settings">
@@ -23,15 +40,17 @@ export function Settings({
             value={value}
             onSave={onSave}
           />
-          <button
-            type="button"
-            className="settings-log-toggle"
-            onClick={() => {
-              void openHanteiLogMado();
-            }}
-          >
-            判定ログ
-          </button>
+          {debug ? (
+            <button
+              type="button"
+              className="settings-log-toggle"
+              onClick={() => {
+                void openHanteiLogMado();
+              }}
+            >
+              判定ログ
+            </button>
+          ) : null}
         </>
       ) : null}
     </section>

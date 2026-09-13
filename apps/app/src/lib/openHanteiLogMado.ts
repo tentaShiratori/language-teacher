@@ -1,10 +1,15 @@
 import { WebviewWindow } from "@tauri-apps/api/webviewWindow";
 import { HANTEI_LOG_PATH } from "./appRoutes";
+import { isDebug } from "./debug";
 
 const HANTEI_LOG_MADO_LABEL = "hantei-log";
 const HANTEI_LOG_MADO_URL = `/#${HANTEI_LOG_PATH}`;
 
 export async function openHanteiLogMado(): Promise<void> {
+  if (!(await isDebug())) {
+    return;
+  }
+
   const existing = await WebviewWindow.getByLabel(HANTEI_LOG_MADO_LABEL);
   if (existing !== null) {
     await existing.setFocus();
