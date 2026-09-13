@@ -1,5 +1,5 @@
 {
-  "identifier": "com.tenta.language_teacher.debug",
+  "identifier": "com.tenta.languageteacher.debug",
   "build": {
     "features": ["debug"]
   }

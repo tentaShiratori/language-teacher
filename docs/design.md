@@ -123,7 +123,7 @@ Rust のコマンド（IPC）は次だけ。保存の中身はコマンドの向
 | `log_js_error`                    | JS のエラー行を `error_js.jsonl` へ追記        |
 | `is_debug`                        | 開発用 feature / `tauri dev` なら true         |
 
-SQLite はアプリデータディレクトリ。場所は identifier 由来。`tauri build` は `com.tenta.language_teacher`。`tauri dev` は Cargo feature `debug` を付け、identifier を `com.tenta.language_teacher.debug` にする。開発実行と本番インストールで保存が混ざらない。機能のつけ外しは Cargo features（`debug` が土台）。フロントは `is_debug` と `html[data-debug]` で画面を出し分ける。
+SQLite はアプリデータディレクトリ。場所は identifier 由来。`tauri build` は `com.tenta.languageteacher`。`tauri dev` は Cargo feature `debug` を付け、identifier を `com.tenta.languageteacher.debug` にする。開発実行と本番インストールで保存が混ざらない。機能のつけ外しは Cargo features（`debug` が土台）。フロントは `is_debug` と `html[data-debug]` で画面を出し分ける。
 
 スキーマは `store.rs` が持つ。判定のやり取りログはファイル。
 
