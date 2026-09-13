@@ -1,7 +1,7 @@
 use tauri::Config;
 
-pub const PRODUCTION_IDENTIFIER: &str = "com.tenta.language_teacher";
-pub const DEBUG_IDENTIFIER: &str = "com.tenta.language_teacher.debug";
+pub const PRODUCTION_IDENTIFIER: &str = "com.tenta.languageteacher";
+pub const DEBUG_IDENTIFIER: &str = "com.tenta.languageteacher.debug";
 
 pub fn identifier(debug: bool) -> &'static str {
     if debug {
@@ -35,7 +35,7 @@ mod tests {
     #[test]
     fn identifier_off_is_production() {
         assert_eq!(identifier(false), PRODUCTION_IDENTIFIER);
-        assert_eq!(identifier(false), "com.tenta.language_teacher");
+        assert_eq!(identifier(false), "com.tenta.languageteacher");
     }
 
     #[test]
@@ -51,6 +51,13 @@ mod tests {
         assert_ne!(identifier(false), identifier(true));
         assert!(!DEBUG_IDENTIFIER.ends_with('.'));
         assert!(!PRODUCTION_IDENTIFIER.contains("debug"));
+        for id in [PRODUCTION_IDENTIFIER, DEBUG_IDENTIFIER] {
+            assert!(
+                id.chars().all(|c| c.is_ascii_alphanumeric() || c == '.'),
+                "{id} は英数字と . だけ"
+            );
+            assert!(!id.contains('_'));
+        }
     }
 
     #[test]
