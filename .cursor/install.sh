@@ -36,8 +36,12 @@ fi
 # 4. ワークスペースの依存を導入する。
 mise exec -- pnpm install --frozen-lockfile
 
-# 5. Next.js 16 のルート型を生成する（未生成だと apps/web の typecheck が LayoutProps で落ちる）。
-( cd apps/web && mise exec -- pnpm exec next typegen )
+# 5. apps/web があれば Next.js 16 のルート型を生成する（未生成だと apps/web の
+#    typecheck が LayoutProps で落ちる）。この構成は apps/app（Tauri）のみで apps/web は
+#    無いので、ある場合だけ実行する。
+if [ -d apps/web ]; then
+  ( cd apps/web && mise exec -- pnpm exec next typegen )
+fi
 
 # 6. 非ログインで起動される MCP サーバ（mcp.json の uvx 起動）やフック（hooks.json の
 #    node .cursor/hooks/*.ts）からもピン止めツールを引けるようにする。~/.bashrc の
