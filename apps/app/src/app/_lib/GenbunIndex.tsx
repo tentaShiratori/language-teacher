@@ -40,6 +40,9 @@ export function GenbunIndex({
               <span className="genbun-index-meta">
                 {gengoLabel(item.gakushuGengo)} · {formatCreatedAt(item.createdAt)}
               </span>
+              {item.inyoMoto !== "" ? (
+                <span className="genbun-index-inyo">{item.inyoMoto}</span>
+              ) : null}
             </button>
             <button type="button" className="genbun-index-delete" onClick={() => onDelete(item.id)}>
               消す

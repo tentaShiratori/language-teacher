@@ -85,7 +85,8 @@ html[data-debug] .app h1::after {
   font-weight: 500;
 }
 
-.genbun-index-meta {
+.genbun-index-meta,
+.genbun-index-inyo {
   font-size: 0.85rem;
   color: #555;
   font-weight: 400;
@@ -100,6 +101,7 @@ html[data-debug] .app h1::after {
 }
 
 .genbun-paste label,
+.inyo-moto-field,
 .yakubun-field,
 .bun-body-caret {
   display: flex;

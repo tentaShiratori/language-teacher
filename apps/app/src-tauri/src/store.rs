@@ -23,6 +23,7 @@ pub struct BunRecord {
 pub struct GenbunRecord {
     pub id: String,
     pub body: String,
+    pub inyo_moto: String,
     pub gakushu_gengo: String,
     pub created_at: String,
     pub buns: Vec<BunRecord>,
@@ -33,6 +34,7 @@ pub struct GenbunRecord {
 pub struct GenbunSummary {
     pub id: String,
     pub first_line: String,
+    pub inyo_moto: String,
     pub gakushu_gengo: String,
     pub created_at: String,
 }
@@ -82,6 +84,7 @@ impl Store {
             CREATE TABLE IF NOT EXISTS genbun (
               id TEXT PRIMARY KEY NOT NULL,
               body TEXT NOT NULL,
+              inyo_moto TEXT NOT NULL DEFAULT '',
               gakushu_gengo TEXT NOT NULL,
               created_at TEXT NOT NULL
             );
@@ -111,6 +114,10 @@ impl Store {
         )
         .map_err(|e| e.to_string())?;
         let _ = conn.execute("ALTER TABLE bun ADD COLUMN naoshita_yakubun TEXT", []);
+        let _ = conn.execute(
+            "ALTER TABLE genbun ADD COLUMN inyo_moto TEXT NOT NULL DEFAULT ''",
+            [],
+        );
         Ok(())
     }
 
@@ -120,15 +127,17 @@ impl Store {
 
         tx.execute(
             r#"
-            INSERT INTO genbun (id, body, gakushu_gengo, created_at)
-            VALUES (?1, ?2, ?3, ?4)
+            INSERT INTO genbun (id, body, inyo_moto, gakushu_gengo, created_at)
+            VALUES (?1, ?2, ?3, ?4, ?5)
             ON CONFLICT(id) DO UPDATE SET
               body = excluded.body,
+              inyo_moto = excluded.inyo_moto,
               gakushu_gengo = excluded.gakushu_gengo
             "#,
             params![
                 record.id,
                 record.body,
+                record.inyo_moto,
                 record.gakushu_gengo,
                 record.created_at
             ],
@@ -172,7 +181,7 @@ impl Store {
         let mut stmt = conn
             .prepare(
                 r#"
-                SELECT id, body, gakushu_gengo, created_at
+                SELECT id, body, inyo_moto, gakushu_gengo, created_at
                 FROM genbun
                 ORDER BY created_at DESC
                 "#,
@@ -183,11 +192,13 @@ impl Store {
             .query_map([], |row| {
                 let id: String = row.get(0)?;
                 let body: String = row.get(1)?;
-                let gakushu_gengo: String = row.get(2)?;
-                let created_at: String = row.get(3)?;
+                let inyo_moto: String = row.get(2)?;
+                let gakushu_gengo: String = row.get(3)?;
+                let created_at: String = row.get(4)?;
                 Ok(GenbunSummary {
                     id,
                     first_line: first_line(&body),
+                    inyo_moto,
                     gakushu_gengo,
                     created_at,
                 })
@@ -206,7 +217,7 @@ impl Store {
         let genbun = conn
             .query_row(
                 r#"
-                SELECT id, body, gakushu_gengo, created_at
+                SELECT id, body, inyo_moto, gakushu_gengo, created_at
                 FROM genbun
                 WHERE id = ?1
                 "#,
@@ -217,13 +228,14 @@ impl Store {
                         row.get::<_, String>(1)?,
                         row.get::<_, String>(2)?,
                         row.get::<_, String>(3)?,
+                        row.get::<_, String>(4)?,
                     ))
                 },
             )
             .optional()
             .map_err(|e| e.to_string())?;
 
-        let Some((id, body, gakushu_gengo, created_at)) = genbun else {
+        let Some((id, body, inyo_moto, gakushu_gengo, created_at)) = genbun else {
             return Ok(None);
         };
 
@@ -260,6 +272,7 @@ impl Store {
         Ok(Some(GenbunRecord {
             id,
             body,
+            inyo_moto,
             gakushu_gengo,
             created_at,
             buns,
@@ -382,6 +395,7 @@ mod tests {
         GenbunRecord {
             id: id.to_string(),
             body: "こんにちは。\n次の行。".to_string(),
+            inyo_moto: "".to_string(),
             gakushu_gengo: "en".to_string(),
             created_at: "2026-09-08T00:00:00.000Z".to_string(),
             buns: vec![
@@ -417,6 +431,49 @@ mod tests {
         assert_eq!(loaded.buns.len(), 2);
         assert_eq!(loaded.buns[0].yakubun, "Hello.");
         assert_eq!(loaded.buns[0].tekisetsu, None);
+        assert_eq!(loaded.inyo_moto, "");
+    }
+
+    #[test]
+    fn save_and_load_inyo_moto() {
+        let store = temp_store();
+        let mut record = sample("g1b", "Hello.");
+        record.inyo_moto = "https://example.com/news".to_string();
+        store.save_genbun(record).unwrap();
+        let loaded = store.load_genbun("g1b").unwrap().expect("exists");
+        assert_eq!(loaded.inyo_moto, "https://example.com/news");
+        let list = store.list_genbun().unwrap();
+        assert_eq!(list[0].inyo_moto, "https://example.com/news");
+    }
+
+    #[test]
+    fn existing_genbun_inyo_moto_is_empty() {
+        let nanos = SystemTime::now()
+            .duration_since(UNIX_EPOCH)
+            .unwrap()
+            .as_nanos();
+        let path = std::env::temp_dir().join(format!("language_teacher_legacy_{nanos}.sqlite"));
+        {
+            let conn = Connection::open(&path).expect("open legacy");
+            conn.execute_batch(
+                r#"
+                CREATE TABLE genbun (
+                  id TEXT PRIMARY KEY NOT NULL,
+                  body TEXT NOT NULL,
+                  gakushu_gengo TEXT NOT NULL,
+                  created_at TEXT NOT NULL
+                );
+                INSERT INTO genbun (id, body, gakushu_gengo, created_at)
+                VALUES ('old', 'こんにちは。', 'en', '2026-09-08T00:00:00.000Z');
+                "#,
+            )
+            .expect("seed legacy");
+        }
+        let store = Store::open(&path).expect("migrate");
+        let loaded = store.load_genbun("old").unwrap().expect("exists");
+        assert_eq!(loaded.inyo_moto, "");
+        let list = store.list_genbun().unwrap();
+        assert_eq!(list[0].inyo_moto, "");
     }
 
     #[test]
@@ -435,6 +492,7 @@ mod tests {
         assert_eq!(list.len(), 1);
         assert_eq!(list[0].first_line, "こんにちは。");
         assert_eq!(list[0].gakushu_gengo, "en");
+        assert_eq!(list[0].inyo_moto, "");
     }
 
     #[test]

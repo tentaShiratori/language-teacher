@@ -3,6 +3,7 @@
 export type GenbunSummary = {
   id: string;
   firstLine: string;
+  inyoMoto: string;
   gakushuGengo: string;
   createdAt: string;
 };

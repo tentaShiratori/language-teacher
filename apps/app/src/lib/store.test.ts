@@ -6,6 +6,7 @@ function savedSession(): GenbunSession {
   return {
     id: "session-1",
     body: "あ。い。",
+    inyoMoto: "",
     gakushuGengo: "en",
     createdAt: "2026-09-08T00:00:00.000Z",
     buns: [
@@ -54,6 +55,7 @@ describe("toRecord / fromRecord", () => {
     const record: GenbunRecord = {
       id: "r1",
       body: "あ。",
+      inyoMoto: "書名",
       gakushuGengo: "de",
       createdAt: "2026-01-01T00:00:00.000Z",
       buns: [
@@ -70,9 +72,15 @@ describe("toRecord / fromRecord", () => {
     };
     const session = fromRecord(record);
     expect(session?.gakushuGengo).toBe("de");
+    expect(session?.inyoMoto).toBe("書名");
     expect(session?.selectedIndex).toBe(0);
     expect(session?.buns[0]?.tekisetsu).toBe(true);
     expect(session?.buns[0]?.shiteki).toBe("指摘");
+  });
+
+  test("引用元をレコードに載せる", () => {
+    const record = toRecord({ ...savedSession(), inyoMoto: "https://example.com/c" });
+    expect(record?.inyoMoto).toBe("https://example.com/c");
   });
 
   test("未知の学習言語は拒否する", () => {

@@ -7,6 +7,7 @@ import {
   selectBun,
   selectGengo,
   selectNextBun,
+  setInyoMoto,
   setYakubun,
   startGenbun,
   type GenbunSession,
@@ -28,6 +29,7 @@ function henshuSession(overrides: Partial<GenbunSession> = {}): GenbunSession {
   return {
     id: "session-1",
     body: "あ。い。う。",
+    inyoMoto: "",
     gakushuGengo: "en",
     createdAt: "2026-09-08T00:00:00.000Z",
     buns: [emptyBun("あ。"), emptyBun("い。"), emptyBun("う。")],
@@ -53,18 +55,29 @@ describe("phaseOf / startGenbun", () => {
   test("原文を受け付ける", () => {
     expect(startGenbun("こんにちは。")?.body).toBe("こんにちは。");
     expect(startGenbun("こんにちは。")?.id).toBeNull();
+    expect(startGenbun("こんにちは。")?.inyoMoto).toBe("");
+    expect(startGenbun("こんにちは。", "https://example.com/a")?.inyoMoto).toBe(
+      "https://example.com/a",
+    );
   });
 
   test("空文字は拒否する", () => {
     expect(startGenbun("")).toBeNull();
+    expect(startGenbun("", "URL")).toBeNull();
   });
 });
 
 describe("selectGengo", () => {
   test("分割して編集に入る", () => {
-    const session = selectGengo(startGenbun("あ。い。")!, "ko", "id-2", "2026-09-08T01:00:00.000Z");
+    const session = selectGengo(
+      startGenbun("あ。い。", "書名")!,
+      "ko",
+      "id-2",
+      "2026-09-08T01:00:00.000Z",
+    );
     expect(session.gakushuGengo).toBe("ko");
     expect(session.id).toBe("id-2");
+    expect(session.inyoMoto).toBe("書名");
     expect(session.buns.map((bun) => bun.body)).toEqual(["あ。", "い。"]);
   });
 
@@ -115,10 +128,10 @@ describe("setYakubun", () => {
 
 describe("mergeSelected / resplitSelected", () => {
   test("選択中と次を結合する", () => {
-    expect(mergeSelected(henshuSession()).buns.map((bun) => bun.body)).toEqual([
-      "あ。い。",
-      "う。",
-    ]);
+    const session = henshuSession({ inyoMoto: "書名" });
+    const next = mergeSelected(session);
+    expect(next.buns.map((bun) => bun.body)).toEqual(["あ。い。", "う。"]);
+    expect(next.inyoMoto).toBe("書名");
   });
 
   test("末尾では結合しない", () => {
@@ -139,6 +152,13 @@ describe("mergeSelected / resplitSelected", () => {
   test("キャレット先頭では再分割しない", () => {
     const session = henshuSession();
     expect(resplitSelected(session, 0).buns).toEqual(session.buns);
+  });
+});
+
+describe("setInyoMoto", () => {
+  test("更新と空を受け付ける", () => {
+    expect(setInyoMoto(henshuSession(), "URL").inyoMoto).toBe("URL");
+    expect(setInyoMoto(henshuSession({ inyoMoto: "旧" }), "").inyoMoto).toBe("");
   });
 });
 

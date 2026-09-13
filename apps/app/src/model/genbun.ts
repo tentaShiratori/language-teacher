@@ -8,6 +8,7 @@ export type GenbunPhase = "paste" | "gengo" | "henshu";
 export type GenbunSession = {
   id: string | null;
   body: string;
+  inyoMoto: string;
   gakushuGengo: GakushuGengo | null;
   createdAt: string | null;
   buns: Bun[];
@@ -42,6 +43,7 @@ export function toRecord(session: GenbunSession): GenbunRecord | null {
   return {
     id: session.id,
     body: session.body,
+    inyoMoto: session.inyoMoto,
     gakushuGengo: session.gakushuGengo,
     createdAt: session.createdAt,
     buns: session.buns,
@@ -55,6 +57,7 @@ export function fromRecord(record: GenbunRecord): GenbunSession | null {
   return {
     id: record.id,
     body: record.body,
+    inyoMoto: record.inyoMoto,
     gakushuGengo: record.gakushuGengo,
     createdAt: record.createdAt,
     buns: record.buns,
@@ -72,19 +75,24 @@ export function phaseOf(session: GenbunSession | null): GenbunPhase {
   return "henshu";
 }
 
-/** 空の原文は受け付けない。 */
-export function startGenbun(body: string): GenbunSession | null {
+/** 空の原文は受け付けない。引用元は空でもよい。 */
+export function startGenbun(body: string, inyoMoto = ""): GenbunSession | null {
   if (body === "") {
     return null;
   }
   return {
     id: null,
     body,
+    inyoMoto,
     gakushuGengo: null,
     createdAt: null,
     buns: [],
     selectedIndex: 0,
   };
+}
+
+export function setInyoMoto(session: GenbunSession, inyoMoto: string): GenbunSession {
+  return { ...session, inyoMoto };
 }
 
 /** 学習言語は一度選んだら変えない。選んだ時点で id を付けて保存対象にする。 */

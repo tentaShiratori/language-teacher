@@ -379,10 +379,12 @@ mod tests {
     #[test]
     fn user_prompt_includes_materials() {
         let user = build_user_prompt("en", "全文。", "対象。", "Hello.").unwrap();
-        assert!(user.contains("学習言語: 英語"));
-        assert!(user.contains("全文。"));
-        assert!(user.contains("対象。"));
-        assert!(user.contains("Hello."));
+        assert_eq!(
+            user,
+            "学習言語: 英語\n原文:\n全文。\n\n対象の文:\n対象。\n\n訳文:\nHello."
+        );
+        assert!(!user.contains("引用元"));
+        assert!(!user.contains("inyo_moto"));
     }
 
     #[test]

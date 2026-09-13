@@ -1,7 +1,9 @@
 import { useState, type FormEvent } from "react";
+import { InyoMotoField } from "./InyoMotoField";
 
-export function GenbunPaste({ onPaste }: { onPaste: (body: string) => void }) {
+export function GenbunPaste({ onPaste }: { onPaste: (body: string, inyoMoto: string) => void }) {
   const [body, setBody] = useState("");
+  const [inyoMoto, setInyoMoto] = useState("");
   const canSubmit = body !== "";
 
   function onSubmit(event: FormEvent) {
@@ -9,7 +11,7 @@ export function GenbunPaste({ onPaste }: { onPaste: (body: string) => void }) {
     if (!canSubmit) {
       return;
     }
-    onPaste(body);
+    onPaste(body, inyoMoto);
   }
 
   return (
@@ -22,6 +24,7 @@ export function GenbunPaste({ onPaste }: { onPaste: (body: string) => void }) {
         rows={8}
         placeholder="母語の原文を貼る"
       />
+      <InyoMotoField id="inyo-moto-paste" value={inyoMoto} onChange={setInyoMoto} />
       <button type="submit" disabled={!canSubmit}>
         進む
       </button>

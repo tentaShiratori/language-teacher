@@ -4,6 +4,7 @@ import type { BunRecord } from "./BunRecord";
 export type GenbunRecord = {
   id: string;
   body: string;
+  inyoMoto: string;
   gakushuGengo: string;
   createdAt: string;
   buns: Array<BunRecord>;

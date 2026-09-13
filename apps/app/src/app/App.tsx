@@ -2,6 +2,7 @@ import { BunList } from "./_lib/BunList";
 import { GakushuGengoSelect } from "./_lib/GakushuGengoSelect";
 import { GenbunIndex } from "./_lib/GenbunIndex";
 import { GenbunPaste } from "./_lib/GenbunPaste";
+import { InyoMotoField } from "./_lib/InyoMotoField";
 import { OllamaSetup } from "./_lib/OllamaSetup";
 import { Settings } from "./_lib/Settings";
 import { useGenbun } from "./_lib/useGenbun";
@@ -16,6 +17,7 @@ function App() {
     phase,
     ichiran,
     onPaste,
+    onChangeInyoMoto,
     onSelectGengo,
     onSelectBun,
     onChangeYakubun,
@@ -55,6 +57,7 @@ function App() {
             一覧へ
           </button>
           <GakushuGengoSelect value={session.gakushuGengo} locked={true} onSelect={onSelectGengo} />
+          <InyoMotoField id="inyo-moto" value={session.inyoMoto} onChange={onChangeInyoMoto} />
           <p className="genbun-preview">{session.body}</p>
           <BunList
             buns={session.buns}

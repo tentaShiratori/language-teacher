@@ -43,6 +43,7 @@ function baseSession(yakubun: string, selectedIndex = 0): GenbunSession {
   return {
     id: "s1",
     body: "あ。い。う。",
+    inyoMoto: "",
     gakushuGengo: "en",
     createdAt: "2026-09-08T00:00:00.000Z",
     buns: [emptyBun("あ。", yakubun), emptyBun("い。"), emptyBun("う。")],
@@ -180,5 +181,20 @@ describe("useHantei", () => {
     expect(h.current.selectedIndex).toBe(2);
     await waitFor(() => expect(store.hanteiBun).toHaveBeenCalled());
     await waitFor(() => expect(h.result.current.isPending(2)).toBe(false));
+  });
+
+  test("判定は引用元を渡さない", async () => {
+    vi.mocked(store.hanteiBun).mockResolvedValue(ok);
+    const h = harness({ ...baseSession("Hello"), inyoMoto: "https://example.com/news" });
+    act(() => {
+      h.result.current.onCtrlEnter();
+    });
+    await waitFor(() => expect(store.hanteiBun).toHaveBeenCalledOnce());
+    expect(vi.mocked(store.hanteiBun).mock.calls[0]?.[0]).toEqual({
+      gakushuGengo: "en",
+      genbun: "あ。い。う。",
+      bun: "あ。",
+      yakubun: "Hello",
+    });
   });
 });
