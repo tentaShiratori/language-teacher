@@ -19,7 +19,7 @@ if ! pkg-config --exists webkit2gtk-4.1 2>/dev/null; then
     libxdo-dev libssl-dev libayatana-appindicator3-dev librsvg2-dev
 fi
 
-# 2. mise（mise.toml でピン止めした go / node / rust / pnpm / uv / turbo などを入れる）。
+# 2. mise（mise.toml でピン止めした node / rust / pnpm / uv / turbo などを入れる）。
 export PATH="$HOME/.local/bin:$PATH"
 if ! command -v mise >/dev/null 2>&1; then
   curl -fsSL https://mise.run | sh
@@ -36,14 +36,7 @@ fi
 # 4. ワークスペースの依存を導入する。
 mise exec -- pnpm install --frozen-lockfile
 
-# 5. apps/web があれば Next.js 16 のルート型を生成する（未生成だと apps/web の
-#    typecheck が LayoutProps で落ちる）。この構成は apps/app（Tauri）のみで apps/web は
-#    無いので、ある場合だけ実行する。
-if [ -d apps/web ]; then
-  ( cd apps/web && mise exec -- pnpm exec next typegen )
-fi
-
-# 6. 非ログインで起動される MCP サーバ（mcp.json の uvx 起動）やフック（hooks.json の
+# 5. 非ログインで起動される MCP サーバ（mcp.json の uvx 起動）やフック（hooks.json の
 #    node .cursor/hooks/*.ts）からもピン止めツールを引けるようにする。~/.bashrc の
 #    mise 有効化はログインシェルにしか効かないため、mise の shims を /usr/local/bin
 #    （どの PATH にも入る）へ張る。shim は mise バイナリへの symlink で単体動作する。
@@ -55,6 +48,6 @@ if [ -d "$shims_dir" ]; then
   done
 fi
 
-# 7. graphify のナレッジグラフを生成する（AST 抽出のみ・API コスト無し）。エージェントが
+# 6. graphify のナレッジグラフを生成する（AST 抽出のみ・API コスト無し）。エージェントが
 #    最初から graphify-out/ を使えるようにする。失敗しても install 全体は止めない。
 mise exec -- graphify update . || echo "graphify update をスキップ。後で 'graphify update .' を手動実行してください。"

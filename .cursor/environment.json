@@ -1,4 +1,17 @@
 {
   "name": "language-teacher",
-  "install": "bash .cursor/install.sh"
+  "install": "bash .cursor/install.sh",
+  "terminals": [
+    {
+      "name": "app",
+      "command": "cd apps/app && ~/.local/bin/mise exec -- pnpm tauri dev",
+      "description": "言語教師（Tauri + Vite）の開発起動。http://localhost:1420 でフロントを確認する"
+    }
+  ],
+  "ports": [
+    {
+      "name": "app",
+      "port": 1420
+    }
+  ]
 }
