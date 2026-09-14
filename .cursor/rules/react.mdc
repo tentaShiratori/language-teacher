@@ -6,7 +6,7 @@ alwaysApply: false
 
 # React
 
-判定・変換は純関数。コンポーネントは表示、カスタムフックは状態と副作用。web のページ用ファイルは `page.tsx` と同じ階層の `_lib/`。`features/` などの層は新設しない。名前は `architecture.mdc`。
+判定・変換は純関数。コンポーネントは表示、カスタムフックは状態と副作用。画面専用は各ルートの `_lib/`。`features/` などの層は新設しない。名前は `architecture.mdc`。
 
 ## コンポーネント
 
@@ -26,7 +26,7 @@ alwaysApply: false
 
 `入力 → いまの値と出来事を起こす関数`。名前は `useXxx`。
 
-- 画面ごとではなく、ひとまとまりの関心事（入出金の記録と更新）でまとめる
+- 画面ごとではなく、ひとまとまりの関心事でまとめる
 - 戻り値はビューが使うデータと `onXxx`。入力欄の一時状態は持たない
 - 更新は `setState(prev => next)` か純関数の reducer。描画で閉じた古い値を書かない
 - updater / reducer の中で副作用を起こさない
@@ -34,49 +34,32 @@ alwaysApply: false
 
 ```tsx
 // ❌ 中間層が運ぶだけ。入力中の状態まで親が持つ
-function LedgerBody({ amount, items, okSubmit, onOk }: Props) {
+function GenbunBody({ yakubun, buns, okSubmit, onOk }: Props) {
   return (
-    <LedgerList items={items} amount={amount} okSubmit={okSubmit} onOk={onOk} />
+    <BunList buns={buns} yakubun={yakubun} okSubmit={okSubmit} onOk={onOk} />
   );
 }
 
-// ✅ 帳簿はフック。入力はフォームに閉じる。親は組み立て
-export function useNyushukkin() {
-  const items = itemsFromSnapshot(
+// ✅ 関心事はフック。入力はフォームに閉じる。親は組み立て
+export function useGenbun() {
+  const session = sessionFromStore(
     useSyncExternalStore(subscribe, snapshot, () => null),
   );
-  function onRecord(input: NyushukkinInput) {
-    const recorded = recordNyushukkin(input, todayJst(), createId());
-    if (recorded.ok) persist(replaceNyushukkin(items, recorded.value));
-    return recorded;
+  function onSetYakubun(yakubun: string) {
+    const next = setYakubun(session, yakubun);
+    if (next) persist(toRecord(next));
+    return next;
   }
-  return { items, onRecord };
+  return { session, onSetYakubun };
 }
 
-export function Ledger() {
-  const { items, onRecord } = useNyushukkin();
+export function App() {
+  const { session, onSetYakubun } = useGenbun();
   return (
     <>
-      <NyushukkinForm onRecord={onRecord} />
-      <ul>
-        {items.map((item) => (
-          <NyushukkinItem key={item.id} item={item} />
-        ))}
-      </ul>
+      <YakubunField onSetYakubun={onSetYakubun} />
+      <BunList buns={session?.buns ?? []} />
     </>
   );
-}
-
-function NyushukkinForm({
-  onRecord,
-}: {
-  onRecord: (input: NyushukkinInput) => NyushukkinResult<Nyushukkin>;
-}) {
-  const [input, setInput] = useState(emptyInput(todayJst()));
-  return <form onSubmit={() => onRecord(input)} />;
-}
-
-function Actions({ children }: { children: ReactNode }) {
-  return <div className="flex gap-3">{children}</div>;
 }
 ```
