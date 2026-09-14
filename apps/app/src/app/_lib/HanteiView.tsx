@@ -27,8 +27,8 @@ export function HanteiView({
         <div className={tekisetsu ? "hantei-tekisetsu" : "hantei-futekisetsu"}>
           <p className="hantei-kekka">{kekka}</p>
           {hasShiteki ? <p className="hantei-shiteki">{bun.shiteki}</p> : null}
-          {futekisetsu && hasNaoshita ? (
-            <p className="hantei-naoshita" aria-label="直した訳文">
+          {hasNaoshita ? (
+            <p className="hantei-naoshita" aria-label={tekisetsu ? "自然な訳文" : "直した訳文"}>
               {bun.naoshitaYakubun}
             </p>
           ) : null}

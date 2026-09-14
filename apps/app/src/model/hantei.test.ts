@@ -68,7 +68,7 @@ describe("runHanteiIfNeeded", () => {
       imi: true,
       bunpo: true,
       shiteki: "指摘",
-      naoshitaYakubun: null,
+      naoshitaYakubun: "I went.",
     });
   });
 
@@ -92,7 +92,27 @@ describe("runHanteiIfNeeded", () => {
     });
   });
 
-  test("適切なら短い指摘を残し直した訳文は捨てる", async () => {
+  test("適切でも空でなければ naoshitaYakubun を残す", async () => {
+    await expect(
+      runHanteiIfNeeded("Hi", async () =>
+        raw({
+          tekisetsu: true,
+          imi: true,
+          bunpo: true,
+          shiteki: "もう少し自然に",
+          naoshitaYakubun: "I went.",
+        }),
+      ),
+    ).resolves.toEqual({
+      tekisetsu: true,
+      imi: true,
+      bunpo: true,
+      shiteki: "もう少し自然に",
+      naoshitaYakubun: "I went.",
+    });
+  });
+
+  test("適切で十分自然なら naoshitaYakubun は null", async () => {
     await expect(
       runHanteiIfNeeded("Hi", async () =>
         raw({
@@ -100,7 +120,27 @@ describe("runHanteiIfNeeded", () => {
           imi: true,
           bunpo: true,
           shiteki: "このままで自然",
-          naoshitaYakubun: "I went.",
+          naoshitaYakubun: null,
+        }),
+      ),
+    ).resolves.toEqual({
+      tekisetsu: true,
+      imi: true,
+      bunpo: true,
+      shiteki: "このままで自然",
+      naoshitaYakubun: null,
+    });
+  });
+
+  test("境界: 適切で naoshitaYakubun が空なら null", async () => {
+    await expect(
+      runHanteiIfNeeded("Hi", async () =>
+        raw({
+          tekisetsu: true,
+          imi: true,
+          bunpo: true,
+          shiteki: "このままで自然",
+          naoshitaYakubun: "",
         }),
       ),
     ).resolves.toEqual({
