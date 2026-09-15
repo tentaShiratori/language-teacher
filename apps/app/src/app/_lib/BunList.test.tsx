@@ -24,13 +24,13 @@ function renderBunList(overrides: Partial<Parameters<typeof BunList>[0]> & { bun
     canHantei: overrides.canHantei ?? true,
     isPending: overrides.isPending ?? (() => false),
     errorOf: overrides.errorOf ?? (() => null),
-    onSelect: overrides.onSelect ?? vi.fn(),
-    onChangeYakubun: overrides.onChangeYakubun ?? vi.fn(),
-    onTab: overrides.onTab ?? vi.fn(),
-    onCtrlEnter: overrides.onCtrlEnter ?? vi.fn(),
-    onHantei: overrides.onHantei ?? vi.fn(),
-    onMerge: overrides.onMerge ?? vi.fn(),
-    onResplit: overrides.onResplit ?? vi.fn(),
+    onSelect: overrides.onSelect ?? vi.fn<(index: number) => void>(),
+    onChangeYakubun: overrides.onChangeYakubun ?? vi.fn<(yakubun: string) => void>(),
+    onTab: overrides.onTab ?? vi.fn<() => void>(),
+    onCtrlEnter: overrides.onCtrlEnter ?? vi.fn<() => void>(),
+    onHantei: overrides.onHantei ?? vi.fn<() => void>(),
+    onMerge: overrides.onMerge ?? vi.fn<() => void>(),
+    onResplit: overrides.onResplit ?? vi.fn<(caret: number) => void>(),
   };
   return { ...render(<BunList {...props} />), props };
 }
