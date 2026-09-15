@@ -256,14 +256,11 @@ fn log_attempt(
 }
 
 fn fetch_chat_content(url: &str, body: &ChatRequest) -> Result<String, String> {
-    let response = ureq::post(url)
-        .set("Content-Type", "application/json")
-        .send_json(body)
-        .map_err(|e| e.to_string())?;
-    if !(200..300).contains(&response.status()) {
-        return Err(format!("chat completions HTTP {}", response.status()));
-    }
-    let parsed: ChatResponse = response.into_json().map_err(|e| e.to_string())?;
+    let mut response = ureq::post(url).send_json(body).map_err(|e| match e {
+        ureq::Error::StatusCode(code) => format!("chat completions HTTP {code}"),
+        other => other.to_string(),
+    })?;
+    let parsed: ChatResponse = response.body_mut().read_json().map_err(|e| e.to_string())?;
     parsed
         .choices
         .first()

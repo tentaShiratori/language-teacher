@@ -38,14 +38,11 @@ pub fn status_from_model_names(model: &str, names: &[String]) -> OllamaStatus {
 
 pub fn fetch_ollama_status(base_url: &str, model: &str) -> OllamaStatus {
     let url = tags_url(base_url);
-    let response = match ureq::get(&url).call() {
+    let mut response = match ureq::get(&url).call() {
         Ok(response) => response,
         Err(_) => return OllamaStatus::Unreachable,
     };
-    if !(200..300).contains(&response.status()) {
-        return OllamaStatus::Unreachable;
-    }
-    let tags: TagsResponse = match response.into_json() {
+    let tags: TagsResponse = match response.body_mut().read_json() {
         Ok(tags) => tags,
         Err(_) => return OllamaStatus::Unreachable,
     };
