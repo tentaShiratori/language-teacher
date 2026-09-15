@@ -110,6 +110,15 @@ html[data-debug] .app h1::after {
   font-weight: 500;
 }
 
+.bun-body-caret textarea {
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+  word-break: break-word;
+  overflow-x: hidden;
+  resize: vertical;
+  min-height: 4.5rem;
+}
+
 textarea,
 input[type="text"] {
   width: 100%;

@@ -43,7 +43,7 @@ export function BunList({
   onMerge: () => void;
   onResplit: (caret: number) => void;
 }) {
-  const bodyRef = useRef<HTMLInputElement>(null);
+  const bodyRef = useRef<HTMLTextAreaElement>(null);
   const selected = buns[selectedIndex];
   const canMerge = selectedIndex < buns.length - 1;
 
@@ -81,7 +81,7 @@ export function BunList({
         <div className="bun-henshu">
           <label className="bun-body-caret">
             文（キャレット位置で再分割）
-            <input ref={bodyRef} type="text" readOnly value={selected.body} />
+            <textarea ref={bodyRef} readOnly rows={3} value={selected.body} wrap="soft" />
           </label>
           <div className="bun-actions">
             <button type="button" disabled={!canMerge} onClick={onMerge}>
