@@ -16,10 +16,10 @@
     "tauri": "pnpm --filter @language-teacher/app tauri"
   },
   "devDependencies": {
-    "@types/node": "^26.6.5",
+    "@types/node": "^26.6.6",
     "fallow": "^3.37.0",
     "oxfmt": "^0.75.0",
-    "turbo": "^2.11.8",
+    "turbo": "^2.11.10",
     "typescript": "7.0.2"
   },
   "packageManager": "pnpm@11.17.0"
