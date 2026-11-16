@@ -19,7 +19,7 @@
     "@types/node": "^26.6.6",
     "fallow": "^3.42.0",
     "oxfmt": "^0.78.0",
-    "turbo": "^2.11.10",
+    "turbo": "^2.11.11",
     "typescript": "7.0.2"
   },
   "packageManager": "pnpm@11.17.0"
